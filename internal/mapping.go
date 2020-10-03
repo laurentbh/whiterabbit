@@ -8,23 +8,30 @@ import (
 type Mapping struct {
 	Label      string
 	Attributes map[string]string
+	Values     map[string]interface{}
 }
 
 func GetMapping(input interface{}) (Mapping, error) {
 
 	var mapping Mapping
 
-	label := reflect.TypeOf(input)
+	valType := reflect.ValueOf(input)
 
-	if label.Kind() != reflect.Struct {
+	if valType.Kind() != reflect.Struct {
 		return mapping, errors.New("input is not a struct")
 	}
-	mapping.Label = label.Name()
-	mapping.Attributes = make(map[string]string, label.NumField())
+	val := reflect.ValueOf(input).Elem()
 
-	for i := 0; i < label.NumField(); i++ {
-		f := label.Field(i)
-		mapping.Attributes[f.Name] = f.Type.Name()
+	structType := valType.Type()
+	mapping.Label = structType.Name()
+	mapping.Attributes = make(map[string]string, structType.NumField())
+	mapping.Values = make(map[string]interface{}, structType.NumField())
+
+	for i := 0; i < valType.NumField(); i++ {
+		fieldType := valType.Type().Field(i)
+		fieldValue := val.Field(i)
+		mapping.Attributes[fieldType.Name] = fieldType.Type.Name()
+		mapping.Values[fieldType.Name] = fieldValue
 	}
 
 	return mapping, nil

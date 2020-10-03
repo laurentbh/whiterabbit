@@ -22,7 +22,7 @@ func TestMapping(t *testing.T) {
 		Attributes: map[string]string{"A": "int", "B": "string", "C": "float64"},
 	}
 
-	var input Anode
+	input := Anode{A: 1, B: "lol", C: 2}
 	mapping, _ := GetMapping(input)
 
 	// TODO : find sonething for assertions
