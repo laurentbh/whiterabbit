@@ -21,7 +21,7 @@ func TestMapping(t *testing.T) {
 	expected := Mapping{
 		Label:      "Anode",
 		Attributes: map[string]string{"A": "int", "B": "string", "C": "float64"},
-		Values:     map[string]string{"A": "415", "B": "i am a sstring", "C": "3.14"},
+		Values:     map[string]string{"A": "415", "B": "i am a string", "C": "3.14"},
 	}
 
 	input := Anode{A: 415, B: "i am a string", C: 3.14}
