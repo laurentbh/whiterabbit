@@ -10,7 +10,7 @@ import (
 type Mapping struct {
 	Label      string
 	Attributes map[string]string
-	Values     map[string]string
+	Values     map[string]interface{}
 }
 
 func GetMapping(input interface{}) (Mapping, error) {
@@ -26,7 +26,7 @@ func GetMapping(input interface{}) (Mapping, error) {
 	structType := val.Type()
 	mapping.Label = structType.Name()
 	mapping.Attributes = make(map[string]string, structType.NumField())
-	mapping.Values = make(map[string]string, structType.NumField())
+	mapping.Values = make(map[string]interface{}, structType.NumField())
 
 	for i := 0; i < val.NumField(); i++ {
 		fieldType := val.Type().Field(i)
