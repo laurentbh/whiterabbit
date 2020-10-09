@@ -34,6 +34,11 @@ func Open() (*DB, error) {
 	return &DB{driver: driver}, nil
 }
 
+// Close ...
+func (db *DB) Close() error {
+	return db.driver.Close()
+}
+
 // GetSession open session
 func (r *DB) GetSession() (neo4j.Session, error) {
 	session, err := r.driver.Session(neo4j.AccessModeWrite)
