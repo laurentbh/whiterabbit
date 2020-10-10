@@ -13,7 +13,7 @@ type TestStruct struct {
 
 func TestConvert(t *testing.T) {
 
-	props := map[string]interface{}{"A": 123, "B": "multi string", "C": 3.14}
+	props := map[string]interface{}{"A": "123", "B": "multi string", "C": "3.14"}
 	attrs := map[string]string{"A": "int", "B": "string", "C": "float64"}
 
 	ret, _ := Convert(TestStruct{}, props, attrs)
@@ -29,7 +29,7 @@ func TestConvert(t *testing.T) {
 	}
 }
 func TestConvertBadArg(t *testing.T) {
-	props := map[string]interface{}{"A": 123, "B": "multi string", "C": 3.14}
+	props := map[string]interface{}{"A": "123", "B": "multi string", "C": "3.14"}
 	attrs := map[string]string{"A": "int", "B": "string", "C": "float64"}
 
 	_, err := Convert(&TestStruct{}, props, attrs)
@@ -46,7 +46,7 @@ func TestConvertUnHandled(t *testing.T) {
 		A int
 		B []string
 	}
-	props := map[string]interface{}{"A": 123, "B": []string{"str1", "str2"}}
+	props := map[string]interface{}{"A": "123", "B": "[]string{\"str1\", \"str2\"}"}
 	attrs := map[string]string{"A": "int", "B": "[]string"}
 
 	_, err := Convert(dummy{}, props, attrs)

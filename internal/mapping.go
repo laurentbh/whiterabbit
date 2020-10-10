@@ -41,7 +41,7 @@ func Convert(targetStruct interface{}, props map[string]interface{}, attributes 
 	for k, v := range props {
 		fieldVal := copyValue.FieldByName(k)
 		if fieldVal != empty {
-			err := setValue(&fieldVal, attributes[k], v)
+			err := setValue(&fieldVal, attributes[k], v.(string))
 			if err != nil {
 				return "", err
 			}
@@ -92,17 +92,24 @@ func getValue(v reflect.Value) (string, error) {
 	msg := fmt.Sprintf("getValue for %v is not implemented", v.Kind())
 	return "", errors.New(msg)
 }
-func setValue(v *reflect.Value, targetType string, value interface{}) error {
+func setValue(v *reflect.Value, targetType string, value string) error {
 	switch targetType {
 	case "string":
-		v.SetString(value.(string))
+		v.SetString(value)
 		return nil
 	case "int":
-		fmt.Printf("int kind = %s", v.Kind().String())
-		v.SetInt(int64(value.(int)))
+		intVal, err := strconv.Atoi(value)
+		if err != nil {
+			return err
+		}
+		v.SetInt(int64(intVal))
 		return nil
 	case "float64":
-		v.SetFloat(value.(float64))
+		floatVal, err := strconv.ParseFloat(value, 64)
+		if err != nil {
+			return err
+		}
+		v.SetFloat(floatVal)
 		return nil
 	default:
 		msg := fmt.Sprintf("setValue for %v is not implemented", targetType)
