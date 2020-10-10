@@ -14,8 +14,8 @@ const (
 	host      = "localhost"
 	port      = 7687
 	encrypted = false
-	user      = "root"
-	password  = "neo4j"
+	user      = "neo4j"
+	password  = "root"
 )
 
 // Open a connection to neo4j

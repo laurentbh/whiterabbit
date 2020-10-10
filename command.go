@@ -1,10 +1,45 @@
 package whiterabbit
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/laurentbh/whiterabbit/internal"
+	"github.com/neo4j/neo4j-go-driver/neo4j"
 )
+
+func (db *DB) FindNodes(nodeType interface{}) error {
+
+	session, _ := db.GetSession()
+
+	defer session.Close()
+	mapping, _ := internal.GetMapping(nodeType)
+
+	cypher := findNodeCypher(mapping)
+	result, err := session.Run(cypher,
+		map[string]interface{}{})
+	if err != nil {
+		return err
+	}
+	if err = result.Err(); err != nil {
+		return err
+	}
+	for result.Next() {
+		record := result.Record()
+		v := record.GetByIndex(0)
+		node := v.(neo4j.Node)
+		props := node.Props()
+		fmt.Printf("node %#v .  props %#v\n", node, props)
+	}
+	return nil
+}
+func findNodeCypher(mapping internal.Mapping) string {
+	var builder strings.Builder
+	builder.WriteString("MATCH (n:")
+	builder.WriteString(mapping.Label)
+	builder.WriteString(") RETURN n")
+	return builder.String()
+}
 
 // CreateNode ...
 func (db *DB) CreateNode(value interface{}) error {
@@ -31,7 +66,6 @@ func (db *DB) CreateNode(value interface{}) error {
 func createNodeCypher(mapping internal.Mapping) (ret string) {
 
 	var builder strings.Builder
-	// REATE (n:Ingredient{name: "🥩 beef"});
 	builder.WriteString("CREATE (n:")
 	builder.WriteString(mapping.Label)
 
@@ -50,12 +84,10 @@ func createNodeCypher(mapping internal.Mapping) (ret string) {
 			builder.WriteString(k)
 			builder.WriteString(": $")
 			builder.WriteString(k)
-
 			sep = true
 		}
 	}
 	builder.WriteString("})")
 	ret = builder.String()
 	return
-
 }

@@ -5,16 +5,20 @@ import "testing"
 func TestCreateNode(t *testing.T) {
 
 	neo, _ := Open()
+	defer neo.Close()
 
-	type Test struct {
+	type User struct {
 		Name string
 		Id   int
 	}
-	s := Test{Name: "test attribute", Id: 415}
+	// s := User{Name: "user 2"}
+	// err := neo.CreateNode(s)
+	// if err != nil {
+	// 	t.Errorf("error %s", err)
+	// }
 
-	err := neo.CreateNode(s)
+	err := neo.FindNodes(User{})
 	if err != nil {
-		t.Errorf("error %s", err)
+		t.Errorf("findNodes %v", err)
 	}
-	neo.Close()
 }
