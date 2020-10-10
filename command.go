@@ -7,6 +7,14 @@ import (
 	"github.com/neo4j/neo4j-go-driver/neo4j"
 )
 
+func (db *DB) InTransactions(lambda func(db *DB)) {
+	session, _ := db.GetSession()
+
+	lambda(db)
+
+	defer session.Close()
+}
+
 func (db *DB) FindNodes(nodeType interface{}) ([]interface{}, error) {
 
 	session, _ := db.GetSession()
