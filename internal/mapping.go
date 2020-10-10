@@ -15,11 +15,14 @@ type Mapping struct {
 }
 
 // Convert neo4j record to a struct
-func Convert(targetStruct interface{}, props map[string]interface{}, attributes map[string]string) interface{} {
+func Convert(targetStruct interface{}, props map[string]interface{}, attributes map[string]string) (interface{}, error) {
 	rValue := reflect.ValueOf(targetStruct)
 	fmt.Println("input Kind: ", rValue.Kind())
 	fmt.Println("input Type: ", rValue.Type())
-	// TODO: make sure it's a struct and not a pointer
+	if rValue.Kind() != reflect.Struct {
+		err := errors.New("need a struct")
+		return "", err
+	}
 
 	//make a copy
 	copyValuePtr := reflect.New(rValue.Type())
@@ -38,10 +41,13 @@ func Convert(targetStruct interface{}, props map[string]interface{}, attributes 
 	for k, v := range props {
 		fieldVal := copyValue.FieldByName(k)
 		if fieldVal != empty {
-			setValue(&fieldVal, attributes[k], v)
+			err := setValue(&fieldVal, attributes[k], v)
+			if err != nil {
+				return "", err
+			}
 		}
 	}
-	return copyValue.Interface()
+	return copyValue.Interface(), nil
 }
 
 // GetMapping builds a Mapping structure for a given struct
