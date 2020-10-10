@@ -15,7 +15,7 @@ type Mapping struct {
 }
 
 // Convert neo4j record to a struct
-func Convert(targetStruct interface{}, props map[string]string, attributes map[string]string) interface{} {
+func Convert(targetStruct interface{}, props map[string]interface{}, attributes map[string]string) interface{} {
 	rValue := reflect.ValueOf(targetStruct)
 	fmt.Println("input Kind: ", rValue.Kind())
 	fmt.Println("input Type: ", rValue.Type())
@@ -86,25 +86,18 @@ func getValue(v reflect.Value) (string, error) {
 	msg := fmt.Sprintf("getValue for %v is not implemented", v.Kind())
 	return "", errors.New(msg)
 }
-func setValue(v *reflect.Value, targetType string, value string) error {
+func setValue(v *reflect.Value, targetType string, value interface{}) error {
 	switch targetType {
 	case "string":
-		v.SetString(value)
+		v.SetString(value.(string))
 		return nil
 	case "int":
-		conv, err := strconv.ParseInt(value, 10, 64)
-		if err == nil {
-			v.SetInt(conv)
-			return nil
-		}
-		return err
+		fmt.Printf("int kind = %s", v.Kind().String())
+		v.SetInt(int64(value.(int)))
+		return nil
 	case "float64":
-		conv, err := strconv.ParseFloat(value, 64)
-		if err == nil {
-			v.SetFloat(conv)
-			return nil
-		}
-		return err
+		v.SetFloat(value.(float64))
+		return nil
 	default:
 		msg := fmt.Sprintf("setValue for %v is not implemented", targetType)
 		return errors.New(msg)

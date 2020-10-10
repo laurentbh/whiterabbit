@@ -12,17 +12,17 @@ type TestStruct struct {
 	C float64
 }
 
-func TestLol2(t *testing.T) {
+func TestConvert(t *testing.T) {
 
-	props := map[string]string{"A": "123", "B": "multi string", "C": "3.14"}
+	props := map[string]interface{}{"A": 123, "B": "multi string", "C": 3.14}
 	attrs := map[string]string{"A": "int", "B": "string", "C": "float64"}
 
-	ret := lol2(TestStruct{}, props, attrs)
+	ret := Convert(TestStruct{}, props, attrs)
 	kind := reflect.TypeOf(ret)
 	fmt.Printf("kind =%v", kind)
 
 	c := ret.(TestStruct)
-	if c.A != 123 || c.B != "multi string" || c.C != 3.142 {
+	if c.A != 123 || c.B != "multi string" || c.C != 3.14 {
 		t.Errorf("error ret is %#v", c)
 	}
 }
@@ -43,13 +43,12 @@ func TestMappingWithEmptyField(t *testing.T) {
 		} else if mapping.Attributes[k] != expected.Attributes[k] {
 			t.Errorf("attribute error key:[%s] expecting [%s] got [%s]", k, expected.Attributes[k], mapping.Attributes[k])
 		}
-
 	}
 }
 func TestMapping(t *testing.T) {
 
 	expected := Mapping{
-		Label:      "Anode",
+		Label:      "TestStruct",
 		Attributes: map[string]string{"A": "int", "B": "string", "C": "float64"},
 		Values:     map[string]interface{}{"A": "415", "B": "i am a string", "C": "3.14"},
 	}
