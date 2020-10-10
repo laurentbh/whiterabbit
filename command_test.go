@@ -1,6 +1,9 @@
 package whiterabbit
 
-import "testing"
+import (
+	"fmt"
+	"testing"
+)
 
 func TestCreateNode(t *testing.T) {
 
@@ -17,8 +20,9 @@ func TestCreateNode(t *testing.T) {
 	// 	t.Errorf("error %s", err)
 	// }
 
-	err := neo.FindNodes(User{})
+	ret, err := neo.FindNodes(User{})
 	if err != nil {
 		t.Errorf("findNodes %v", err)
 	}
+	fmt.Printf("--> %v", ret)
 }

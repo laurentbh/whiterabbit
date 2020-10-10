@@ -1,14 +1,13 @@
 package whiterabbit
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/laurentbh/whiterabbit/internal"
 	"github.com/neo4j/neo4j-go-driver/neo4j"
 )
 
-func (db *DB) FindNodes(nodeType interface{}) error {
+func (db *DB) FindNodes(nodeType interface{}) ([]interface{}, error) {
 
 	session, _ := db.GetSession()
 
@@ -19,19 +18,25 @@ func (db *DB) FindNodes(nodeType interface{}) error {
 	result, err := session.Run(cypher,
 		map[string]interface{}{})
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if err = result.Err(); err != nil {
-		return err
+		return nil, err
 	}
+	var ret []interface{}
 	for result.Next() {
 		record := result.Record()
 		v := record.GetByIndex(0)
 		node := v.(neo4j.Node)
 		props := node.Props()
-		fmt.Printf("node %#v .  props %#v\n", node, props)
+
+		tmp, err := internal.Convert(nodeType, props, mapping.Attributes)
+		if err != nil {
+			return nil, err
+		}
+		ret = append(ret, tmp)
 	}
-	return nil
+	return ret, nil
 }
 func findNodeCypher(mapping internal.Mapping) string {
 	var builder strings.Builder
