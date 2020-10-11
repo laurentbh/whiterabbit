@@ -53,9 +53,14 @@ func TestRelation(t *testing.T) {
 
 		nbNodes := len(path.Nodes())
 		fmt.Printf("path: %#v  nb nodes: %d\n", path, nbNodes)
+<<<<<<< HEAD
 		for i, n := range path.Nodes() {
 			fmt.Printf("\tnode %d: %#v\n", i, n)
 			fmt.Printf("\t\t%#v", n.Props())
+=======
+		for _, n := range path.Nodes() {
+			fmt.Printf("node : %#v\n", n)
+>>>>>>> e214c170ae28cd82d2eba19330416de2a816828c
 		}
 		nbRel := len(path.Relationships())
 		fmt.Printf("path: %#v  nb rel: %d\n", path, nbRel)
