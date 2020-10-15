@@ -15,27 +15,25 @@ type Mapping struct {
 }
 
 // Convert neo4j record to a struct
-func Convert(targetStruct interface{}, props map[string]interface{}, attributes map[string]string) (interface{}, error) {
-	rValue := reflect.ValueOf(targetStruct)
-	fmt.Println("input Kind: ", rValue.Kind())
-	fmt.Println("input Type: ", rValue.Type())
+func Convert(target interface{}, props map[string]interface{}, attributes map[string]string) (interface{}, error) {
+	rValue := reflect.ValueOf(target)
+	// fmt.Println("input Kind: ", rValue.Kind())
+	// fmt.Println("input Type: ", rValue.Type())
 	if rValue.Kind() != reflect.Struct {
-		err := errors.New("need a struct")
+		err := errors.New("target is not a struct")
 		return "", err
 	}
 
 	//make a copy
 	copyValuePtr := reflect.New(rValue.Type())
-	fmt.Println("copy Kind: ", copyValuePtr.Kind()) // => ptr
-	fmt.Println("copy Type: ", copyValuePtr.Type()) //*(struct)
+	// fmt.Println("copy Kind: ", copyValuePtr.Kind()) // => ptr
+	// fmt.Println("copy Type: ", copyValuePtr.Type()) //*(struct)
 
 	// deference
 	copyValue := copyValuePtr.Elem()
-	fmt.Println("deferenced Kind: ", copyValue.Kind())
-	fmt.Println("deferenced Type: ", copyValue.Type())
-
-	nbField := copyValue.NumField()
-	fmt.Println("nb fields : ", nbField)
+	// fmt.Println("deferenced Kind: ", copyValue.Kind())
+	// fmt.Println("deferenced Type: ", copyValue.Type())
+	// fmt.Println("nb fields : ", copyValue.NumField())
 
 	empty := reflect.Value{}
 	for k, v := range props {
