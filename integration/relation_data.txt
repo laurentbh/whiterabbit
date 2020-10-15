@@ -1,0 +1,26 @@
+MATCH (u:Category ) DETACH DELETE u;
+MATCH (u:Ingredient ) DELETE u;
+
+CREATE (n:Category{name: "vegetable"});
+CREATE (n:Category{name: "🍖 meat"});
+CREATE (n:Category{name: "poultry"});
+
+CREATE (n:Ingredient{name: "🥩 beef"});
+CREATE (n:Ingredient{name: "🐔 chicken"});
+CREATE (n:Ingredient{name: "🐷 pig"});
+CREATE (n:Ingredient{name: "🐷 pig", Name: "second"});
+
+MATCH (i: Ingredient), (c: Category)
+WHERE i.name CONTAINS "beef" AND c.name CONTAINS "meat"
+CREATE (i) -[r: Defined_By] -> (c)
+RETURN r;
+
+MATCH (i: Ingredient), (c: Category)
+WHERE i.name CONTAINS "chicken" AND c.name CONTAINS "meat"
+CREATE (i) -[r: Defined_By] -> (c)
+RETURN r;
+
+MATCH (i: Ingredient), (c: Category)
+WHERE i.name CONTAINS "chicken" AND c.name CONTAINS "poultry"
+CREATE (i) -[r: Defined_By] -> (c)
+RETURN r;
