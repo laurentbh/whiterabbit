@@ -6,6 +6,7 @@ import (
 )
 
 type TestStruct struct {
+	Model
 	A int
 	B string
 	C float64
@@ -63,7 +64,10 @@ func TestMappingWithEmptyField(t *testing.T) {
 		Attributes: map[string]string{"A": "int", "B": "string", "C": "float64"},
 		Values:     map[string]interface{}{"B": "i am a string"},
 	}
-	mapping, _ := GetMapping(input)
+	mapping, err := GetMapping(input)
+	if err != nil {
+		t.Error("GetMqapping error ", err)
+	}
 	for k := range expected.Attributes {
 		_, ok := mapping.Attributes[k]
 		if !ok {
@@ -82,7 +86,10 @@ func TestMapping(t *testing.T) {
 	}
 
 	input := TestStruct{A: 415, B: "i am a string", C: 3.14}
-	mapping, _ := GetMapping(input)
+	mapping, err := GetMapping(input)
+	if err != nil {
+		t.Error("GetMqapping error ", err)
+	}
 
 	// TODO : find sonething for assertions
 	if mapping.Label != expected.Label {

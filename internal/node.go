@@ -46,15 +46,28 @@ func convertNode(node neo4j.Node, candidates []interface{}) (interface{}, error)
 	//make a copy
 	copyValuePtr := reflect.New(rValue.Type())
 	copyValue := copyValuePtr.Elem()
+
+	// prepare additional labels (anything not in rValue)
+	addLabels := make(map[string]string)
 	for k, v := range node.Props() {
-		// only export fields
-		if k[0] >= 'A' && k[0] <= 'Z' {
+		fieldVal := copyValue.FieldByName(k)
+		if (fieldVal == reflect.Value{}) {
+			addLabels[k] = v.(string)
+		} else {
 			fieldVal := copyValue.FieldByName(k)
 			err := setValue2(&fieldVal, v.(string))
 			if err != nil {
 				return "", err
 			}
 		}
+	}
+	model := copyValue.FieldByName("Model")
+	if (model != reflect.Value{}) {
+		idField := model.FieldByName("ID")
+		idField.SetInt(node.Id())
+		labField := model.FieldByName("Labels")
+		addLabelsValue := reflect.ValueOf(addLabels)
+		labField.Set(addLabelsValue)
 	}
 	return copyValue.Interface(), nil
 }

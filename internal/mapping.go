@@ -68,13 +68,15 @@ func GetMapping(input interface{}) (Mapping, error) {
 
 	for i := 0; i < val.NumField(); i++ {
 		fieldType := val.Type().Field(i)
-		mapping.Attributes[fieldType.Name] = fieldType.Type.Name()
+		if fieldType.Name != "Model" {
+			mapping.Attributes[fieldType.Name] = fieldType.Type.Name()
 
-		val, err := getValue(val.Field(i))
-		if err != nil {
-			return mapping, err
+			val, err := getValue(val.Field(i))
+			if err != nil {
+				return mapping, err
+			}
+			mapping.Values[fieldType.Name] = val
 		}
-		mapping.Values[fieldType.Name] = val
 	}
 	return mapping, nil
 }
