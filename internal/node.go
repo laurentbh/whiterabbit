@@ -10,7 +10,8 @@ import (
 	"github.com/neo4j/neo4j-go-driver/neo4j"
 )
 
-func convertNode(node neo4j.Node, candidates []interface{}) (interface{}, error) {
+// ConvertNode converts neo4j node into one of the candidate struct
+func ConvertNode(node neo4j.Node, candidates []interface{}) (interface{}, error) {
 
 	var candidateType []string
 	// build list of type while making sure all candidates are struct

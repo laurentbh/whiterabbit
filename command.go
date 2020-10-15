@@ -23,14 +23,14 @@ func (db *DB) FindNodes(nodeType interface{}) ([]interface{}, error) {
 	if err = result.Err(); err != nil {
 		return nil, err
 	}
+	candidate := []interface{}{nodeType}
 	var ret []interface{}
 	for result.Next() {
 		record := result.Record()
 		v := record.GetByIndex(0)
 		node := v.(neo4j.Node)
-		props := node.Props()
 
-		tmp, err := internal.Convert(nodeType, props, mapping.Attributes)
+		tmp, err := internal.ConvertNode(node, candidate)
 		if err != nil {
 			return nil, err
 		}
