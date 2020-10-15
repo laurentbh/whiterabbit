@@ -18,7 +18,7 @@ func TestConvertNode(t *testing.T) {
 	}
 	var candidate []interface{}
 	candidate = append(candidate, TestStruct{})
-	ret, err := convertNode(mock, candidate)
+	ret, err := ConvertNode(mock, candidate)
 	if err != nil {
 		t.Errorf("TestConvertNode : %s", err)
 	}
