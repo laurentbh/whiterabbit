@@ -40,8 +40,8 @@ func (db *DB) Close() error {
 }
 
 // GetSession open session
-func (r *DB) GetSession() (neo4j.Session, error) {
-	session, err := r.driver.Session(neo4j.AccessModeWrite)
+func (db *DB) GetSession() (neo4j.Session, error) {
+	session, err := db.driver.Session(neo4j.AccessModeWrite)
 	if err != nil {
 		return nil, err
 	}

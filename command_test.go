@@ -5,8 +5,6 @@ import (
 	"math/rand"
 	"strconv"
 	"testing"
-
-	"github.com/laurentbh/whiterabbit/internal"
 )
 
 func TestCreateFetchNode(t *testing.T) {
@@ -15,7 +13,7 @@ func TestCreateFetchNode(t *testing.T) {
 	defer neo.Close()
 
 	type User struct {
-		internal.Model
+		Model
 		Name string
 	}
 

@@ -1,4 +1,4 @@
-package internal
+package whiterabbit
 
 // Model go struct to add neo4j specific fields
 type Model struct {

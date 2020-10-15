@@ -3,7 +3,6 @@ package whiterabbit
 import (
 	"fmt"
 
-	"github.com/laurentbh/whiterabbit/internal"
 	"github.com/neo4j/neo4j-go-driver/neo4j"
 )
 
@@ -45,11 +44,11 @@ func (db *DB) MatchRelation(name string, candidates []interface{}) ([]Relation, 
 			fmt.Printf("\t\t%#v", n.Props())
 		}
 
-		rel.from, err = internal.ConvertNode(path.Nodes()[0], candidates)
+		rel.from, err = ConvertNode(path.Nodes()[0], candidates)
 		if err != nil {
 			return ret, err
 		}
-		rel.to, err = internal.ConvertNode(path.Nodes()[1], candidates)
+		rel.to, err = ConvertNode(path.Nodes()[1], candidates)
 		if err != nil {
 			return ret, err
 		}
