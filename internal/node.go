@@ -10,7 +10,8 @@ import (
 	"github.com/neo4j/neo4j-go-driver/neo4j"
 )
 
-func convertNode(node neo4j.Node, candidates []interface{}) (interface{}, error) {
+// ConvertNode converts neo4j node into one of the candidate struct
+func ConvertNode(node neo4j.Node, candidates []interface{}) (interface{}, error) {
 
 	var candidateType []string
 	// build list of type while making sure all candidates are struct
@@ -46,15 +47,30 @@ func convertNode(node neo4j.Node, candidates []interface{}) (interface{}, error)
 	//make a copy
 	copyValuePtr := reflect.New(rValue.Type())
 	copyValue := copyValuePtr.Elem()
+
+	// prepare additional labels (anything not in rValue)
+	addLabels := make(map[string]string)
 	for k, v := range node.Props() {
-		// only export fields
-		if k[0] >= 'A' && k[0] <= 'Z' {
-			fieldVal := copyValue.FieldByName(k)
+		// TODO: decide if we keep this matching between neo4j and my struct
+		upperK := strings.ToUpper(k[:1]) + k[1:]
+		fieldVal := copyValue.FieldByName(upperK)
+		if (fieldVal == reflect.Value{}) {
+			addLabels[k] = v.(string)
+		} else {
+			fieldVal := copyValue.FieldByName(upperK)
 			err := setValue2(&fieldVal, v.(string))
 			if err != nil {
 				return "", err
 			}
 		}
+	}
+	model := copyValue.FieldByName("Model")
+	if (model != reflect.Value{}) {
+		idField := model.FieldByName("ID")
+		idField.SetInt(node.Id())
+		labField := model.FieldByName("Labels")
+		addLabelsValue := reflect.ValueOf(addLabels)
+		labField.Set(addLabelsValue)
 	}
 	return copyValue.Interface(), nil
 }
