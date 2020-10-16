@@ -10,8 +10,8 @@ import (
 	"github.com/laurentbh/whiterabbit"
 )
 
-func init() {
-	content, err := ioutil.ReadFile("relation_data.txt")
+func loadFixure(file string) {
+	content, err := ioutil.ReadFile(file)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -44,6 +44,7 @@ func init() {
 }
 
 func TestRelation(t *testing.T) {
+	loadFixure("./relation_data.txt")
 
 	neo, _ := whiterabbit.Open(whiterabbit.DefaultConfig{})
 	defer neo.Close()
