@@ -10,23 +10,14 @@ type DB struct {
 	driver neo4j.Driver
 }
 
-const (
-	host      = "localhost"
-	port      = 7687
-	encrypted = false
-	user      = "neo4j"
-	password  = "root"
-)
-
 // Open a connection to neo4j
-// TODO : pass a config
-func Open() (*DB, error) {
+func Open(cfg Config) (*DB, error) {
 
-	uri := "bolt://" + host + ":" + strconv.Itoa(port)
+	uri := "bolt://" + cfg.GetHost() + ":" + strconv.Itoa(cfg.GetPort())
 	driver, err := neo4j.NewDriver(uri,
-		neo4j.BasicAuth(user, password, ""),
+		neo4j.BasicAuth(cfg.GetUser(), cfg.GetPassword(), ""),
 		func(c *neo4j.Config) {
-			c.Encrypted = encrypted
+			c.Encrypted = cfg.GetEncrypted()
 		})
 	if err != nil {
 		return nil, err

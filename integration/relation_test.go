@@ -10,7 +10,7 @@ import (
 	"github.com/laurentbh/whiterabbit"
 )
 
-func init_disable() {
+func init() {
 	content, err := ioutil.ReadFile("relation_data.txt")
 	if err != nil {
 		log.Fatal(err)
@@ -19,7 +19,7 @@ func init_disable() {
 
 	cmds := strings.Split(cypher, ";")
 
-	neo, err := whiterabbit.Open()
+	neo, err := whiterabbit.Open(whiterabbit.DefaultConfig{})
 	if err != nil {
 		panic(err)
 	}
@@ -45,7 +45,7 @@ func init_disable() {
 
 func TestRelation(t *testing.T) {
 
-	neo, _ := whiterabbit.Open()
+	neo, _ := whiterabbit.Open(whiterabbit.DefaultConfig{})
 	defer neo.Close()
 
 	candidate := []interface{}{Ingredient{}, Category{}}
