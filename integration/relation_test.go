@@ -1,7 +1,6 @@
 package integration
 
 import (
-	"fmt"
 	"io/ioutil"
 	"log"
 	"strings"
@@ -46,15 +45,28 @@ func loadFixure(file string) {
 func TestRelation(t *testing.T) {
 	loadFixure("./relation_data.txt")
 
+	relName := "Defined_By"
+
 	neo, _ := whiterabbit.Open(whiterabbit.DefaultConfig{})
 	defer neo.Close()
 
 	candidate := []interface{}{Ingredient{}, Category{}}
 
-	m, err := neo.MatchRelation("Defined_By", candidate)
+	relations, err := neo.MatchRelation(relName, candidate)
 	if err != nil {
 		t.Errorf("call to MatchRelation: %s", err)
 	}
-	fmt.Printf("matches : %v", m)
+	// fmt.Printf("matches : %v", relations)
+	for _, r := range relations {
+		if r.Relation != relName {
+			t.Errorf("expected relation %s , got %s", relName, r.Relation)
+		}
+		if _, ok := r.From.(Ingredient); ok == false {
+			t.Errorf("wrong struct in from got %v", r.From)
+		}
+		if _, ok := r.To.(Category); ok == false {
+			t.Errorf("wrong struct in to, got %v", r.To)
+		}
+	}
 
 }

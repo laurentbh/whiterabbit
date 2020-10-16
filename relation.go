@@ -1,16 +1,14 @@
 package whiterabbit
 
 import (
-	"fmt"
-
 	"github.com/neo4j/neo4j-go-driver/neo4j"
 )
 
 // Relation ...
 type Relation struct {
-	relation string
-	from     interface{}
-	to       interface{}
+	Relation string
+	From     interface{}
+	To       interface{}
 }
 
 // MatchRelation ...
@@ -34,25 +32,22 @@ func (db *DB) MatchRelation(name string, candidates []interface{}) ([]Relation, 
 		var rel Relation
 		record := result.Record()
 		v := record.GetByIndex(0)
-		// node := v.(neo4j.Node)
-		// props := node.Props()
 
-		// fmt.Printf("node %v\nprops %v", node, props)
 		path := v.(neo4j.Path)
-		for i, n := range path.Nodes() {
-			fmt.Printf("\tnode %d: %#v\n", i, n)
-			fmt.Printf("\t\t%#v", n.Props())
-		}
+		// for i, n := range path.Nodes() {
+		// 	fmt.Printf("\tnode %d: %#v\n", i, n)
+		// 	fmt.Printf("\t\t%#v\n", n.Props())
+		// }
 
-		rel.from, err = ConvertNode(path.Nodes()[0], candidates)
+		rel.From, err = ConvertNode(path.Nodes()[0], candidates)
 		if err != nil {
 			return ret, err
 		}
-		rel.to, err = ConvertNode(path.Nodes()[1], candidates)
+		rel.To, err = ConvertNode(path.Nodes()[1], candidates)
 		if err != nil {
 			return ret, err
 		}
-		rel.relation = name
+		rel.Relation = name
 		ret = append(ret, rel)
 
 		// nbRel := len(path.Relationships())
@@ -60,8 +55,6 @@ func (db *DB) MatchRelation(name string, candidates []interface{}) ([]Relation, 
 		// for _, n := range path.Relationships() {
 		// 	fmt.Printf("rel : %#v\n", n)
 		// }
-
 	}
 	return ret, nil
-
 }

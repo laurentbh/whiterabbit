@@ -5,7 +5,7 @@ import "github.com/laurentbh/whiterabbit"
 // Category ...
 type Category struct {
 	whiterabbit.Model
-	name string
+	Name string
 }
 
 // Ingredient ...
