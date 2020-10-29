@@ -24,12 +24,12 @@ func loadFixure(file string) {
 	}
 	defer neo.Close()
 
-	session, _ := neo.GetSession()
-	defer session.Close()
+	con, _ := neo.GetConnection()
+	defer con.Close()
 
 	for _, c := range cmds {
 		if len(c) != 0 {
-			res, err := session.Run(c,
+			res, err := con.GetSession().Run(c,
 				map[string]interface{}{})
 			if err != nil {
 				panic(err)
@@ -52,7 +52,10 @@ func TestRelation(t *testing.T) {
 
 	candidate := []interface{}{Ingredient{}, Category{}}
 
-	relations, err := neo.MatchRelation(relName, candidate)
+	con, _ := neo.GetConnection()
+	defer con.Close()
+
+	relations, err := con.MatchRelation(relName, candidate)
 	if err != nil {
 		t.Errorf("call to MatchRelation: %s", err)
 	}

@@ -30,11 +30,13 @@ func (db *DB) Close() error {
 	return db.driver.Close()
 }
 
-// GetSession open session
-func (db *DB) GetSession() (neo4j.Session, error) {
+// GetConnection open and return a neo4j session
+func (db *DB) GetConnection() (Connection, error) {
 	session, err := db.driver.Session(neo4j.AccessModeWrite)
 	if err != nil {
-		return nil, err
+		return Connection{}, err
 	}
-	return session, nil
+	var con Connection
+	con.session = session
+	return con, nil
 }

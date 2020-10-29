@@ -12,14 +12,10 @@ type Relation struct {
 }
 
 // MatchRelation ...
-func (db *DB) MatchRelation(name string, candidates []interface{}) ([]Relation, error) {
-
-	session, _ := db.GetSession()
-
-	defer session.Close()
+func (con *Connection) MatchRelation(name string, candidates []interface{}) ([]Relation, error) {
 
 	cypher := "MATCH p=()-[r:" + name + "]->() RETURN p"
-	result, err := session.Run(cypher,
+	result, err := con.GetSession().Run(cypher,
 		map[string]interface{}{})
 	if err != nil {
 		return nil, err
