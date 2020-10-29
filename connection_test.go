@@ -9,8 +9,11 @@ import (
 
 func TestCreateFetchNode(t *testing.T) {
 
-	neo, _ := Open()
+	neo, _ := Open(DefaultConfig{})
 	defer neo.Close()
+
+	con, _ := neo.GetConnection()
+	defer con.Close()
 
 	type User struct {
 		Model
@@ -20,12 +23,12 @@ func TestCreateFetchNode(t *testing.T) {
 	// create dummy user
 	rand := rand.Int63n(100)
 	s := User{Name: "user " + strconv.FormatInt(rand, 10)}
-	err := neo.CreateNode(s)
+	_, err := con.CreateNode(s)
 	if err != nil {
 		t.Errorf("error %s", err)
 	}
 
-	ret, err := neo.FindNodes(User{})
+	ret, err := con.FindNodes(User{})
 	if err != nil {
 		t.Errorf("findNodes %v", err)
 	}
