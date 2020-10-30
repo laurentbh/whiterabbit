@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
-	"strconv"
 	"strings"
 
 	"github.com/neo4j/neo4j-go-driver/neo4j"
@@ -58,7 +57,7 @@ func ConvertNode(node neo4j.Node, candidates []interface{}) (interface{}, error)
 			addLabels[k] = v.(string)
 		} else {
 			fieldVal := copyValue.FieldByName(upperK)
-			err := setValue2(&fieldVal, v.(string))
+			err := setValueNeoToStruct(&fieldVal, v)
 			if err != nil {
 				return "", err
 			}
@@ -74,22 +73,33 @@ func ConvertNode(node neo4j.Node, candidates []interface{}) (interface{}, error)
 	}
 	return copyValue.Interface(), nil
 }
-func setValue2(fv *reflect.Value, value string) error {
+func setValueNeoToStruct(fv *reflect.Value, value interface{}) error {
 	switch fv.Kind() {
 	case reflect.String:
-		fv.SetString(value)
+		fv.SetString(value.(string))
 	case reflect.Int:
-		intVal, err := strconv.Atoi(value)
-		if err != nil {
-			return err
+		conv, ok := value.(int)
+		if ok {
+			fv.SetInt(int64(conv))
+		} else {
+			return fmt.Errorf("can't convert [%v] to int", value)
 		}
-		fv.SetInt(int64(intVal))
+		return nil
 	case reflect.Float64:
-		floatVal, err := strconv.ParseFloat(value, 64)
-		if err != nil {
-			return err
+		conv, ok := value.(float64)
+		if ok {
+			fv.SetFloat(conv)
+		} else {
+			return fmt.Errorf("can't convert [%v] to float", value)
 		}
-		fv.SetFloat(floatVal)
+		return nil
+	case reflect.Int64:
+		conv, ok := value.(int64)
+		if ok {
+			fv.SetInt(conv)
+		} else {
+			return fmt.Errorf("can't convert [%v] to int64", value)
+		}
 		return nil
 	default:
 		msg := fmt.Sprintf("setValue for %s is not implemented", fv.Kind())

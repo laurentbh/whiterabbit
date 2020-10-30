@@ -10,9 +10,9 @@ func TestConvertNode(t *testing.T) {
 		id:         6,
 		mockLabels: []string{"TestStruct"},
 		mockProps: map[string]interface{}{
-			"A":        "123",
+			"A":        123,
 			"B":        "valueForB",
-			"C":        "3.14",
+			"C":        3.14,
 			"newLabel": "newValue",
 			"label2":   "label2Value"},
 	}
