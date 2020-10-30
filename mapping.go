@@ -79,15 +79,14 @@ func GetMapping(input interface{}) (Mapping, error) {
 	return mapping, nil
 }
 
-func getValue(v reflect.Value) (string, error) {
+func getValue(v reflect.Value) (interface{}, error) {
 	switch v.Kind() {
 	case reflect.Int:
-		return strconv.Itoa(v.Interface().(int)), nil
+		return v.Interface().(int), nil
 	case reflect.String:
 		return v.Interface().(string), nil
 	case reflect.Float64:
-		fl := v.Interface().(float64)
-		return fmt.Sprintf("%f", fl), nil
+		return v.Interface().(float64), nil
 	}
 	msg := fmt.Sprintf("getValue for %v is not implemented", v.Kind())
 	return "", errors.New(msg)

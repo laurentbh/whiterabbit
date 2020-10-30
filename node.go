@@ -78,7 +78,8 @@ func setValueNeoToStruct(fv *reflect.Value, value interface{}) error {
 	case reflect.String:
 		fv.SetString(value.(string))
 	case reflect.Int:
-		conv, ok := value.(int)
+		// neo always encodes int as int64
+		conv, ok := value.(int64)
 		if ok {
 			fv.SetInt(int64(conv))
 		} else {

@@ -8,6 +8,12 @@ import (
 	"github.com/laurentbh/whiterabbit"
 )
 
+type user struct {
+	whiterabbit.Model
+	Name string
+	Age  int64
+}
+
 func TestCreateFetchNode(t *testing.T) {
 	LoadFixure([]string{"./fixtures/clean_all.txt"})
 
@@ -16,27 +22,22 @@ func TestCreateFetchNode(t *testing.T) {
 	con, _ := neo.GetConnection()
 	defer con.Close()
 
-	type User struct {
-		whiterabbit.Model
-		Name string
-	}
-
 	// create dummy user
 	userName := "user " + strconv.FormatInt(rand.Int63n(100), 10)
-	s := User{Name: userName}
+	s := user{Name: userName}
 	_, err := con.CreateNode(s)
 	if err != nil {
-		t.Errorf("error %s", err)
+		panic(err)
 	}
 
-	ret, err := con.FindNodes(User{})
+	ret, err := con.FindAllNodes(user{})
 	if err != nil {
 		t.Errorf("findNodes %v", err)
 	}
 	if len(ret) != 1 {
 		t.Errorf("findNodes returned too many entities")
 	}
-	retUser, ok := ret[0].(User)
+	retUser, ok := ret[0].(user)
 
 	if ok == false {
 		t.Error("findNodes return type is not a User")
