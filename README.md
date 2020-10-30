@@ -68,7 +68,9 @@ u = ret.(User)
 - if present `whiterabbit.Model` will be initialized, [see](#white-rabbit-model)
 
 ### white rabbit model
-This struct can be added to your struct to retrieve nodes' attributes not declare in your struct.
+adding `whiterabbit.Model` to struct allows:
+- get `neo4j` node IDs
+- retrieve nodes' attributes not declared in struct
 ```go
 type Model struct {
 	ID     int64             // neo4j node or relationship ID
