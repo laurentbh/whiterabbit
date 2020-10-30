@@ -1,10 +1,72 @@
 # whiterabbit
 
-a wanna be "ORM" for [neo4j](https://neo4j.com/)
+A "wanna be ORM" for [neo4j](https://neo4j.com/).
+
+An easy way to map go struct with neo4j entities
 
 
-## notes
-- `DB` only here to connect to neo4j and create sessions
+## Connection to neo4j
+first step is to open the database
+```go
+db, err := whiterabbit.Open(config)
+```
+- where config is any struct that satisfy the `Config` interface
+- close the database `db.Close()`
 
-## docker
-`docker run  -p 7474:7474 -p 7687:7687 --env NEO4J_AUTH=neo4j/root neo4j:4.1.2`
+## Getting a connection
+a connection, ie a `session` in neo4j world can be obtain:
+```go
+con, err := db.GetConnection()
+```
+`sessions` are meant to be short-live in neo4j world, so they shall be closed as soon as possible `con.Close()`
+
+
+## creating a node
+- nodes create have the name of the struct as label
+- every exported field of the struct is an attribute of the node
+
+For example:
+```go
+type User struct {
+    Name     string
+    Age      int
+    password string
+}
+user := User{Name: "first", Age: 10}
+con.CreateNode(user)
+```
+will create a `Node` labelled `User` with 2 attributes, `Name` and `Age`.
+`password` is ignored
+
+## fetching nodes
+```go
+type User struct {
+	whiterabbit.Model
+    Name     string
+    Age      int
+    password string
+}
+con.FindNodes(User{})
+```
+
+If the struct contains `whiterabbit.Model`, all node's attributes taht are not matching an exported field of the struct, will be copy in `whiterabbit.Model` [see]( white-rabbit-model)
+
+### white rabbit model
+```go
+type Model struct {
+	ID     int64             // neo4j node or relationship ID
+	Labels map[string]string // any label not defined mapping struct
+}
+```
+
+## transactions
+using `Connection.InTransaction(f)`
+where `f` is 
+```go
+func(con *Connection) ([]neo4j.Result, error)
+```
+transaction is rollbacked if `f` returns an error
+
+
+
+
