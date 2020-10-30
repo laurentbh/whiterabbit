@@ -1,0 +1,1 @@
+MATCH (u) DETACH DELETE u;

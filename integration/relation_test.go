@@ -7,7 +7,9 @@ import (
 )
 
 func TestRelation(t *testing.T) {
-	LoadFixure("./relation_data.txt")
+	LoadFixure([]string{
+		"./fixtures/clean_all.txt",
+		"./fixtures/relation_data.txt"})
 
 	relName := "Defined_By"
 
