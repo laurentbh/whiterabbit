@@ -11,7 +11,7 @@ import (
 
 func TestTransactionCommit(t *testing.T) {
 
-	neo, _ := whiterabbit.Open(whiterabbit.DefaultConfig{})
+	neo, _ := whiterabbit.Open(Cfg{})
 	defer neo.Close()
 
 	con, _ := neo.GetConnection()
@@ -43,7 +43,7 @@ func TestTransactionCommit(t *testing.T) {
 
 func TestTransactionRollBack(t *testing.T) {
 
-	neo, _ := whiterabbit.Open(whiterabbit.DefaultConfig{})
+	neo, _ := whiterabbit.Open(Cfg{})
 	defer neo.Close()
 
 	con, _ := neo.GetConnection()

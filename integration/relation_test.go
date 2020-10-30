@@ -1,49 +1,13 @@
 package integration
 
 import (
-	"io/ioutil"
-	"log"
-	"strings"
 	"testing"
 
 	"github.com/laurentbh/whiterabbit"
 )
 
-func loadFixure(file string) {
-	content, err := ioutil.ReadFile(file)
-	if err != nil {
-		log.Fatal(err)
-	}
-	cypher := string(content)
-
-	cmds := strings.Split(cypher, ";")
-
-	neo, err := whiterabbit.Open(whiterabbit.DefaultConfig{})
-	if err != nil {
-		panic(err)
-	}
-	defer neo.Close()
-
-	con, _ := neo.GetConnection()
-	defer con.Close()
-
-	for _, c := range cmds {
-		if len(c) != 0 {
-			res, err := con.GetSession().Run(c,
-				map[string]interface{}{})
-			if err != nil {
-				panic(err)
-			}
-			if res.Err() != nil {
-				panic(res.Err())
-
-			}
-		}
-	}
-}
-
 func TestRelation(t *testing.T) {
-	loadFixure("./relation_data.txt")
+	LoadFixure("./relation_data.txt")
 
 	relName := "Defined_By"
 

@@ -1,22 +1,22 @@
-package whiterabbit
+package integration
 
 import (
 	"fmt"
 	"math/rand"
 	"strconv"
 	"testing"
+
+	"github.com/laurentbh/whiterabbit"
 )
 
 func TestCreateFetchNode(t *testing.T) {
-
-	neo, _ := Open(DefaultConfig{})
+	neo, _ := whiterabbit.Open(Cfg{})
 	defer neo.Close()
-
 	con, _ := neo.GetConnection()
 	defer con.Close()
 
 	type User struct {
-		Model
+		whiterabbit.Model
 		Name string
 	}
 
