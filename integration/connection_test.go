@@ -1,7 +1,6 @@
 package integration
 
 import (
-	"fmt"
 	"math/rand"
 	"strconv"
 	"testing"
@@ -10,6 +9,8 @@ import (
 )
 
 func TestCreateFetchNode(t *testing.T) {
+	LoadFixure([]string{"./fixtures/clean_all.txt"})
+
 	neo, _ := whiterabbit.Open(Cfg{})
 	defer neo.Close()
 	con, _ := neo.GetConnection()
@@ -21,8 +22,8 @@ func TestCreateFetchNode(t *testing.T) {
 	}
 
 	// create dummy user
-	rand := rand.Int63n(100)
-	s := User{Name: "user " + strconv.FormatInt(rand, 10)}
+	userName := "user " + strconv.FormatInt(rand.Int63n(100), 10)
+	s := User{Name: userName}
 	_, err := con.CreateNode(s)
 	if err != nil {
 		t.Errorf("error %s", err)
@@ -32,5 +33,15 @@ func TestCreateFetchNode(t *testing.T) {
 	if err != nil {
 		t.Errorf("findNodes %v", err)
 	}
-	fmt.Printf("--> %v", ret)
+	if len(ret) != 1 {
+		t.Errorf("findNodes returned too many entities")
+	}
+	retUser, ok := ret[0].(User)
+
+	if ok == false {
+		t.Error("findNodes return type is not a User")
+	}
+	if retUser.Name != userName {
+		t.Error("findNodes return wrong User")
+	}
 }
