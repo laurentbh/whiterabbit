@@ -41,7 +41,7 @@ will create a `Node` labelled `User` with 2 attributes, `Name` and `Age`.
 ## fetching nodes
 ```go
 type User struct {
-	whiterabbit.Model
+    whiterabbit.Model
     Name     string
     Age      int
     password string
@@ -56,7 +56,7 @@ If the struct contains `whiterabbit.Model`, all node's attributes that are not m
 ```go
 var node neo4j.Node
 type User struct {
-	whiterabbit.Model
+    whiterabbit.Model
     Name     string
     Age      int
     password string
