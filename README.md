@@ -49,9 +49,26 @@ type User struct {
 con.FindNodes(User{})
 ```
 
-If the struct contains `whiterabbit.Model`, all node's attributes taht are not matching an exported field of the struct, will be copy in `whiterabbit.Model` [see]( white-rabbit-model)
+If the struct contains `whiterabbit.Model`, all node's attributes that are not matching an exported field of the struct, will be copy in `whiterabbit.Model` [see](###white-rabbit-model)
+
+## converting nodes
+`neo4j.Node` can be converted to `struct`:
+```go
+var node neo4j.Node
+type User struct {
+	whiterabbit.Model
+    Name     string
+    Age      int
+    password string
+}
+ret, _ := ConvertNode(node, []interface{}{User{}}))
+u = ret.(User)
+```
+- `ConvertNode` takes an array of `struct` as second parameter representing all potential internal target of the node.
+- if present `whiterabbit.Model` will be initialized, [see](###white-rabbit-model)
 
 ### white rabbit model
+This struct can be added to your struct to retrieve nodes' attributes not declare in your struct.
 ```go
 type Model struct {
 	ID     int64             // neo4j node or relationship ID
