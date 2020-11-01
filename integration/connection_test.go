@@ -8,12 +8,6 @@ import (
 	"github.com/laurentbh/whiterabbit"
 )
 
-type user struct {
-	whiterabbit.Model
-	Name string
-	Age  int64
-}
-
 func TestCreateFetchNode(t *testing.T) {
 	LoadFixure([]string{"./fixtures/clean_all.txt"})
 
@@ -24,25 +18,76 @@ func TestCreateFetchNode(t *testing.T) {
 
 	// create dummy user
 	userName := "user " + strconv.FormatInt(rand.Int63n(100), 10)
-	s := user{Name: userName}
+	s := User{Name: userName, Age: 19}
 	_, err := con.CreateNode(s)
 	if err != nil {
 		panic(err)
 	}
 
-	ret, err := con.FindAllNodes(user{})
+	ret, err := con.FindAllNodes(User{})
 	if err != nil {
 		t.Errorf("findNodes %v", err)
 	}
 	if len(ret) != 1 {
 		t.Errorf("findNodes returned too many entities")
 	}
-	retUser, ok := ret[0].(user)
+	retUser, ok := ret[0].(User)
 
 	if ok == false {
 		t.Error("findNodes return type is not a User")
 	}
 	if retUser.Name != userName {
 		t.Error("findNodes return wrong User")
+	}
+}
+
+func TestFindNodesClause(t *testing.T) {
+	LoadFixure([]string{"./fixtures/clean_all.txt",
+		"./fixtures/findNodesClause.txt"})
+
+	neo, _ := whiterabbit.Open(Cfg{})
+	defer neo.Close()
+	con, _ := neo.GetConnection()
+	defer con.Close()
+
+	where := map[string]interface{}{"Name": "user"}
+	ret, err := con.FindNodesClause(User{}, where, whiterabbit.StartsWith)
+	if err != nil {
+		t.Errorf("findNodes %v", err)
+	}
+	if len(ret) != 3 {
+		t.Errorf("findNodes: %d elements returned, expecting %d", len(ret), 3)
+	}
+	for _, u := range ret {
+		_, ok := u.(User)
+		if ok == false {
+			t.Error("findNodes return type is not a User")
+		}
+	}
+}
+func TestFindNodesMultipleClause(t *testing.T) {
+	LoadFixure([]string{"./fixtures/clean_all.txt",
+		"./fixtures/findNodesClause.txt"})
+
+	neo, _ := whiterabbit.Open(Cfg{})
+	defer neo.Close()
+	con, _ := neo.GetConnection()
+	defer con.Close()
+
+	where := map[string]interface{}{"Name": "user", "Age": 2}
+	ret, err := con.FindNodesClause(User{}, where, whiterabbit.StartsWith)
+	if err != nil {
+		t.Errorf("findNodes %v", err)
+	}
+	if len(ret) != 1 {
+		t.Errorf("findNodes: %d elements returned, expecting %d", len(ret), 1)
+	}
+	u, ok := ret[0].(User)
+	if ok == false {
+		t.Error("findNodes return type is not a User")
+	} else {
+		if u.Age != 2 {
+			t.Error("findNodes return wrong user")
+		}
 	}
 }

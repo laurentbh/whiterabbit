@@ -1,8 +1,6 @@
 # whiterabbit
 
-A "wanna be ORM" for [neo4j](https://neo4j.com/).
-
-An easy way to map go struct with neo4j entities
+Small library to map go struct with  [neo4j](https://neo4j.com/) entities.
 
 
 ## Connection to neo4j
@@ -46,7 +44,8 @@ type User struct {
     Age      int
     password string
 }
-con.FindNodes(User{})
+con.FindAllNodes(User{})
+con.FindNodesClause(User{}, map[string]interface{}{"Name": "user", "Age": 10, }, whiterabbit.StartsWith)
 ```
 
 If the struct contains `whiterabbit.Model`, all node's attributes that are not matching an exported field of the struct, will be copy in `whiterabbit.Model` [see](#white-rabbit-model)
@@ -77,7 +76,11 @@ type Model struct {
 	Labels map[string]string // any label not defined mapping struct
 }
 ```
-
+## relations
+```go
+candidate := []interface{}{Ingredient{}, Category{}}
+relations, err := con.MatchRelation("is_a", candidate)
+```
 ## transactions
 using `Connection.InTransaction(f)`
 where `f` is 

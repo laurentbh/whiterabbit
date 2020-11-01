@@ -13,3 +13,10 @@ type Ingredient struct {
 	whiterabbit.Model
 	Name string
 }
+
+// User structure for tests
+type User struct {
+	whiterabbit.Model
+	Name string
+	Age  int
+}

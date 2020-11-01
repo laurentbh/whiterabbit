@@ -1,6 +1,8 @@
 package whiterabbit
 
 import (
+	"errors"
+	"strconv"
 	"strings"
 
 	"github.com/neo4j/neo4j-go-driver/neo4j"
@@ -58,11 +60,13 @@ func (con *Connection) InTransaction(f func(con *Connection) ([]neo4j.Result, er
 
 // CreateNode ...
 func (con *Connection) CreateNode(value interface{}) (neo4j.Result, error) {
-	mapping, _ := GetMapping(value)
+	mapping, err := GetMapping(value)
+	if err != nil {
+		return nil, err
+	}
 	cyp := createNodeCypher(mapping)
 
 	var result neo4j.Result
-	var err error
 	if con.transaction == nil {
 		result, err = con.session.Run(cyp, mapping.Values)
 	} else {
@@ -104,10 +108,20 @@ func createNodeCypher(mapping Mapping) (ret string) {
 	ret = builder.String()
 	return
 }
-func (con *Connection) FindNodes(nodeType interface{}) ([]interface{}, error) {
+
+// FindAllNodes finds all nodes of a given type
+func (con *Connection) FindAllNodes(nodeType interface{}) ([]interface{}, error) {
 	mapping, _ := GetMapping(nodeType)
 
-	cypher := findNodeCypher(mapping)
+	var builder strings.Builder
+	builder.WriteString("MATCH (n:")
+	builder.WriteString(mapping.Label)
+	builder.WriteString(") RETURN n")
+	return con.findNodeHelper(builder.String(), []interface{}{nodeType})
+}
+
+func (con *Connection) findNodeHelper(cypher string, candidate []interface{}) ([]interface{}, error) {
+	// fmt.Println(cypher)
 	result, err := con.GetSession().Run(cypher,
 		map[string]interface{}{})
 	if err != nil {
@@ -116,7 +130,6 @@ func (con *Connection) FindNodes(nodeType interface{}) ([]interface{}, error) {
 	if err = result.Err(); err != nil {
 		return nil, err
 	}
-	candidate := []interface{}{nodeType}
 	var ret []interface{}
 	for result.Next() {
 		record := result.Record()
@@ -131,10 +144,78 @@ func (con *Connection) FindNodes(nodeType interface{}) ([]interface{}, error) {
 	}
 	return ret, nil
 }
-func findNodeCypher(mapping Mapping) string {
+
+// SearchMode operation used for `WHERE` clauses
+type SearchMode int
+
+const (
+	StartsWith SearchMode = 1 + iota
+	Contains
+	EndsWith
+	Regexp
+)
+
+// FindNodesClause finds all nodes of a given type
+// searchMode is applied for all string
+func (con *Connection) FindNodesClause(nodeType interface{}, where map[string]interface{}, mode SearchMode) ([]interface{}, error) {
+	mapping, err := GetMapping(nodeType)
+	if err != nil {
+		return nil, err
+	}
+	// TODO: must garantee that keys from where match mapping.Attributes
 	var builder strings.Builder
 	builder.WriteString("MATCH (n:")
 	builder.WriteString(mapping.Label)
-	builder.WriteString(") RETURN n")
-	return builder.String()
+	builder.WriteString(")")
+	var firstClause = true
+	if len(where) != 0 {
+		builder.WriteString(" WHERE ")
+		for k, v := range where {
+			if !firstClause {
+				builder.WriteString(" AND ")
+			}
+			builder.WriteString("n.")
+			builder.WriteString(k)
+			if mapping.Attributes[k] == "string" {
+				switch mode {
+				case StartsWith:
+					builder.WriteString(" STARTS WITH ")
+				case Contains:
+					builder.WriteString(" CONTAINS ")
+				case EndsWith:
+					builder.WriteString(" ENDS WITH ")
+				case Regexp:
+					builder.WriteString(" =~ ")
+				}
+			} else {
+				builder.WriteString(" = ")
+			}
+			firstClause = false
+			if mapping.Attributes[k] == "string" {
+				builder.WriteString(" '")
+				builder.WriteString(v.(string))
+				builder.WriteString("'")
+			} else {
+				conv, err := interfaceConv(v)
+				if err != nil {
+					return nil, err
+				}
+				builder.WriteString(conv)
+			}
+		}
+	}
+	builder.WriteString(" RETURN n")
+
+	return con.findNodeHelper(builder.String(), []interface{}{nodeType})
+}
+func interfaceConv(i interface{}) (string, error) {
+	conv, ok := i.(int)
+	if ok {
+		return strconv.Itoa(conv), nil
+	}
+	conv64, ok := i.(int64)
+	if ok {
+		return strconv.FormatInt(conv64, 10), nil
+	}
+	return "", errors.New("interfaceConv")
 }
