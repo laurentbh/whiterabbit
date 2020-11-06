@@ -13,7 +13,7 @@ func TestRelation(t *testing.T) {
 
 	relName := "Defined_By"
 
-	neo, _ := whiterabbit.Open(whiterabbit.DefaultConfig{})
+	neo, _ := whiterabbit.Open(Cfg{})
 	defer neo.Close()
 
 	candidate := []interface{}{Ingredient{}, Category{}}
