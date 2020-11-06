@@ -183,7 +183,8 @@ func (con *Connection) findNodeHelper(cypher string, candidate []interface{}) ([
 type SearchMode int
 
 const (
-	StartsWith SearchMode = 1 + iota
+	Exact SearchMode = 1 + iota
+	StartsWith
 	Contains
 	EndsWith
 	Regexp
@@ -220,6 +221,9 @@ func (con *Connection) FindNodesClause(nodeType interface{}, where map[string]in
 					builder.WriteString(" ENDS WITH ")
 				case Regexp:
 					builder.WriteString(" =~ ")
+				case Exact:
+				default:
+					builder.WriteString(" = ")
 				}
 			} else {
 				builder.WriteString(" = ")
