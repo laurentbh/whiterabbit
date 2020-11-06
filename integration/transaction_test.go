@@ -30,9 +30,9 @@ func TestTransactionCommit(t *testing.T) {
 
 			var results []neo4j.Result
 
-			r, _ := con.CreateNode(cat1)
+			_, r, _ := con.CreateNode(cat1)
 			results = append(results, r)
-			r, _ = con.CreateNode(cat2)
+			_, r, _ = con.CreateNode(cat2)
 			results = append(results, r)
 
 			return results, nil
@@ -55,9 +55,9 @@ func TestTransactionRollBack(t *testing.T) {
 
 		var results []neo4j.Result
 
-		r, _ := con.CreateNode(cat1)
+		_, r, _ := con.CreateNode(cat1)
 		results = append(results, r)
-		r, _ = con.CreateNode(cat2)
+		_, r, _ = con.CreateNode(cat2)
 		results = append(results, r)
 
 		return results, errors.New("force RB")

@@ -8,6 +8,20 @@ import (
 	"github.com/laurentbh/whiterabbit"
 )
 
+func TestCreateNode(t *testing.T) {
+	LoadFixure([]string{"./fixtures/clean_all.txt"})
+
+	neo, _ := whiterabbit.Open(Cfg{})
+	defer neo.Close()
+	con, _ := neo.GetConnection()
+	defer con.Close()
+
+	u := User{Name: "user1"}
+	_, _, err := con.CreateNode(u)
+	if err != nil {
+		t.Errorf("TestCreateNode: %v", err)
+	}
+}
 func TestCreateFetchNode(t *testing.T) {
 	LoadFixure([]string{"./fixtures/clean_all.txt"})
 
@@ -19,7 +33,7 @@ func TestCreateFetchNode(t *testing.T) {
 	// create dummy user
 	userName := "user " + strconv.FormatInt(rand.Int63n(100), 10)
 	s := User{Name: userName, Age: 19}
-	_, err := con.CreateNode(s)
+	_, _, err := con.CreateNode(s)
 	if err != nil {
 		panic(err)
 	}

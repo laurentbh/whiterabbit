@@ -75,10 +75,14 @@ func (con *Connection) InTransaction(f func(con *Connection) ([]neo4j.Result, er
 }
 
 // CreateNode ...
-func (con *Connection) CreateNode(value interface{}) (neo4j.Result, error) {
+// returns:
+// - id of the created node
+// - neo4j.Result to be consumed when in a transaction
+// - error
+func (con *Connection) CreateNode(value interface{}) (int64, neo4j.Result, error) {
 	mapping, err := GetMapping(value)
 	if err != nil {
-		return nil, err
+		return 0, nil, err
 	}
 	cyp := createNodeCypher(mapping)
 
@@ -89,12 +93,26 @@ func (con *Connection) CreateNode(value interface{}) (neo4j.Result, error) {
 		result, err = con.transaction.Run(cyp, mapping.Values)
 	}
 	if err != nil {
-		return nil, err
+		return 0, nil, err
 	}
 	if result.Err() != nil {
-		return nil, result.Err()
+		return 0, nil, result.Err()
 	}
-	return result, nil
+
+	if result.Next() {
+		record := result.Record()
+		nodeI, ok := record.Get("n")
+		if ok {
+			node, ok := nodeI.(neo4j.Node)
+			if !ok {
+				return 0, nil, errors.New("can't convert neo4j node")
+			}
+			return node.Id(), result, nil
+		}
+		return 0, nil, errors.New("can't get record")
+	} else {
+		return 0, nil, errors.New("can't get result")
+	}
 }
 
 func createNodeCypher(mapping Mapping) (ret string) {
@@ -120,7 +138,7 @@ func createNodeCypher(mapping Mapping) (ret string) {
 			sep = true
 		}
 	}
-	builder.WriteString("})")
+	builder.WriteString("}) RETURN n")
 	ret = builder.String()
 	return
 }
