@@ -30,14 +30,9 @@ func LoadFixure(files []string) {
 
 		for _, c := range cmds {
 			if len(c) != 0 {
-				res, err := con.GetSession().Run(c,
-					map[string]interface{}{})
+				err := con.Execute(c, nil)
 				if err != nil {
 					panic(err)
-				}
-				if res.Err() != nil {
-					panic(res.Err())
-
 				}
 			}
 		}

@@ -26,6 +26,22 @@ func (s *Connection) Close() {
 	s.session = nil
 }
 
+// Execute a cypher
+func (con *Connection) Execute(cypher string, params map[string]interface{}) error {
+	p := map[string]interface{}{}
+	if params != nil {
+		p = params
+	}
+	res, err := con.GetSession().Run(cypher, p)
+	if err != nil {
+		return err
+	}
+	if res.Err() != nil {
+		return res.Err()
+	}
+	return nil
+}
+
 // InTransaction ... execute given function in a transaction
 func (con *Connection) InTransaction(f func(con *Connection) ([]neo4j.Result, error)) error {
 	session := con.session
