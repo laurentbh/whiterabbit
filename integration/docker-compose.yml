@@ -5,6 +5,8 @@ services:
         image: neo4j:4.1.2
         ports:
             - "7475:7474" 
-            - "7688:7687"
+            - "7688:7689"
         environment:
-            NEO4J_AUTH: neo4j/root 
+            NEO4J_AUTH: neo4j/root
+            # isolate this bolt port from neo4j not running in container
+            NEO4J_dbms_connector_bolt_listen__address: :7689
