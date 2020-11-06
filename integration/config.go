@@ -15,7 +15,7 @@ func (df Cfg) GetHost() string {
 
 // GetPort ...
 func (df Cfg) GetPort() int {
-	return 7687
+	return 7688
 }
 
 // GetUser ...

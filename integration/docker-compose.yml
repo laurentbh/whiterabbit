@@ -4,10 +4,7 @@ services:
     db:
         image: neo4j:4.1.2
         ports:
-            - "7474:7474" 
-            - "7687:7687"
-        expose: 
-            - "7474"
-            - "7687"
+            - "7475:7474" 
+            - "7688:7687"
         environment:
             NEO4J_AUTH: neo4j/root 
