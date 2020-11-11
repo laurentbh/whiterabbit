@@ -2,6 +2,7 @@ package whiterabbit
 
 import (
 	"errors"
+	"reflect"
 	"strconv"
 	"strings"
 
@@ -24,6 +25,34 @@ func (s *Connection) Close() {
 	// TODO : return error
 	s.session.Close()
 	s.session = nil
+}
+
+// SetUniqueConstraint ...
+func (con *Connection) SetUniqueConstraint(label interface{}, field string, constraintName string) error {
+	val := reflect.ValueOf(label)
+	// make sure label is a struct
+	if val.Kind() != reflect.Struct {
+		return errors.New("label is not a struct")
+	}
+	// and field is a field of the struct
+	_, ok := val.Type().FieldByName(field)
+	if ok == false {
+		return errors.New("field is not in struct")
+	}
+	sb := strings.Builder{}
+	// CREATE CONSTRAINT unique_test
+	// ON (n:Test)
+	// ASSERT n.unique_test IS UNIQU
+	sb.WriteString("CREATE CONSTRAINT ")
+	sb.WriteString(constraintName)
+	sb.WriteString(" ON (n:")
+	sb.WriteString(val.Type().Name())
+	sb.WriteString(") ASSERT n.")
+	sb.WriteString(field)
+	sb.WriteString(" IS UNIQUE")
+
+	return con.Execute(sb.String(), map[string]interface{}{})
+
 }
 
 // Execute a cypher

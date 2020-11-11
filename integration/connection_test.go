@@ -8,6 +8,22 @@ import (
 	"github.com/laurentbh/whiterabbit"
 )
 
+func TestConstraint(t *testing.T) {
+	LoadFixure([]string{"./fixtures/clean_all.txt"})
+	neo, _ := whiterabbit.Open(Cfg{})
+	defer neo.Close()
+	con, _ := neo.GetConnection()
+	defer con.Close()
+
+	err := con.SetUniqueConstraint(Category{}, "name", "cat_name_unique")
+	if err == nil {
+		t.Errorf("should return error")
+	}
+	err = con.SetUniqueConstraint(Category{}, "Name", "cat_name_unique")
+	if err != nil {
+		t.Errorf("should not return error, got [%s]", err)
+	}
+}
 func TestCreateNode(t *testing.T) {
 	LoadFixure([]string{"./fixtures/clean_all.txt"})
 
