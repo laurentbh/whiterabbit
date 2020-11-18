@@ -1,9 +1,33 @@
 package whiterabbit
 
 import (
+	"encoding/json"
 	"testing"
 )
 
+func TestJSON(t *testing.T) {
+
+	type testForJSON struct {
+		Name  string `json:"name"`
+		Age   int64  `json:"age"`
+		Model `json:"model"`
+	}
+
+	m := Model{ID: 475, Labels: map[string]string{"one": "1", "two": "2"}}
+
+	test := testForJSON{Model: m, Name: "nobody", Age: 12}
+
+	bytePayload, err := json.Marshal(test)
+	if err != nil {
+		t.Errorf("shouldn't produce error [%s]", err)
+	}
+	var res testForJSON
+	err = json.Unmarshal(bytePayload, &res)
+
+	if res.Model.ID != 475 || res.Model.Labels["one"] != "1" {
+		t.Errorf("error processing")
+	}
+}
 func TestConvertNode(t *testing.T) {
 
 	mock := MockNode{
