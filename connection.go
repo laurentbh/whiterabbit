@@ -172,6 +172,21 @@ func createNodeCypher(mapping Mapping) (ret string) {
 	return
 }
 
+// FindByProperty find all node with given property containg value
+func (con *Connection) FindByProperty(property string, value string, candidate []interface{}) ([]interface{}, error) {
+	var builder strings.Builder
+	builder.WriteString("MATCH (n) WHERE EXISTS(n.")
+	builder.WriteString(property)
+	builder.WriteString(") AND ")
+	builder.WriteString(" n.")
+	builder.WriteString(property)
+	builder.WriteString(" CONTAINS \"")
+	builder.WriteString(value)
+	builder.WriteString("\" RETURN DISTINCT n")
+
+	return con.findNodeHelper(builder.String(), candidate)
+}
+
 // FindAllNodes finds all nodes of a given type
 func (con *Connection) FindAllNodes(nodeType interface{}) ([]interface{}, error) {
 	mapping, _ := GetMapping(nodeType)
