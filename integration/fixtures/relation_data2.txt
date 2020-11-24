@@ -1,0 +1,18 @@
+CREATE (n:Category{Name: "vegetable"});
+CREATE (n:Ingredient{Name: "potato"});
+CREATE (n:Ingredient{Name: "bean"});
+
+MATCH (i: Ingredient), (c: Category)
+WHERE i.Name CONTAINS "bean" AND c.Name = "vegetable"
+CREATE (i) -[r: Defined_By] -> (c)
+RETURN r;
+
+MATCH (i: Ingredient), (c: Category)
+WHERE i.Name = "potato" AND c.Name = "vegetable"
+CREATE (i) -[r: Defined_By] -> (c)
+RETURN r;
+
+MATCH (i: Ingredient), (j: Ingredient )
+WHERE i.Name = "potato" AND j.Name = "bean"
+CREATE (i) -[r: Like] -> (j)
+RETURN r;
