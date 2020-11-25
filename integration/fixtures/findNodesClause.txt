@@ -2,3 +2,6 @@ CREATE (n:User{Name: "user1", Age:1});
 CREATE (n:User{Name: "user2", Age: 2});
 CREATE (n:User{Name: "user3", Age: 3});
 CREATE (n:Employee{Name: "user3", Age:1});
+
+CREATE (n:User{Name: "laurent", Age:1});
+CREATE (n:User{Name: "Laurent", Age:2});

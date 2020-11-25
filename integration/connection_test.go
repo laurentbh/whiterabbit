@@ -121,3 +121,41 @@ func TestFindNodesMultipleClause(t *testing.T) {
 		}
 	}
 }
+func TestFindNodesIgnoreCase(t *testing.T) {
+	LoadFixure([]string{"./fixtures/clean_all.txt",
+		"./fixtures/findNodesClause.txt"})
+
+	neo, _ := whiterabbit.Open(Cfg{})
+	defer neo.Close()
+	con, _ := neo.GetConnection()
+	defer con.Close()
+
+	where := map[string]interface{}{"Name": "laurent"}
+	ret, err := con.FindNodesClause(User{}, where, whiterabbit.Exact)
+	if err != nil {
+		t.Errorf("findNodes %v", err)
+	}
+	if len(ret) != 1 {
+		t.Errorf("findNodes: %d elements returned, expecting %d", len(ret), 1)
+	}
+	for _, u := range ret {
+		_, ok := u.(User)
+		if ok == false {
+			t.Error("findNodes return type is not a User")
+		}
+	}
+
+	ret, err = con.FindNodesClause(User{}, where, whiterabbit.IgnoreCase)
+	if err != nil {
+		t.Errorf("findNodes %v", err)
+	}
+	if len(ret) != 2 {
+		t.Errorf("findNodes: %d elements returned, expecting %d", len(ret), 2)
+	}
+	for _, u := range ret {
+		_, ok := u.(User)
+		if ok == false {
+			t.Error("findNodes return type is not a User")
+		}
+	}
+}

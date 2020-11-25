@@ -232,6 +232,7 @@ const (
 	Contains
 	EndsWith
 	Regexp
+	IgnoreCase
 )
 
 // FindNodesClause finds all nodes of a given type
@@ -253,8 +254,14 @@ func (con *Connection) FindNodesClause(nodeType interface{}, where map[string]in
 			if !firstClause {
 				builder.WriteString(" AND ")
 			}
-			builder.WriteString("n.")
-			builder.WriteString(k)
+			if mode == IgnoreCase {
+				builder.WriteString("toLower(n.")
+				builder.WriteString(k)
+				builder.WriteString(")")
+			} else {
+				builder.WriteString("n.")
+				builder.WriteString(k)
+			}
 			if mapping.Attributes[k] == "string" {
 				switch mode {
 				case StartsWith:
@@ -265,7 +272,7 @@ func (con *Connection) FindNodesClause(nodeType interface{}, where map[string]in
 					builder.WriteString(" ENDS WITH ")
 				case Regexp:
 					builder.WriteString(" =~ ")
-				case Exact:
+				case Exact, IgnoreCase:
 					builder.WriteString(" = ")
 				default:
 					builder.WriteString(" = ")
@@ -275,9 +282,15 @@ func (con *Connection) FindNodesClause(nodeType interface{}, where map[string]in
 			}
 			firstClause = false
 			if mapping.Attributes[k] == "string" {
-				builder.WriteString(" '")
-				builder.WriteString(v.(string))
-				builder.WriteString("'")
+				if mode == IgnoreCase {
+					builder.WriteString(" toLower('")
+					builder.WriteString(v.(string))
+					builder.WriteString("')")
+				} else {
+					builder.WriteString(" '")
+					builder.WriteString(v.(string))
+					builder.WriteString("'")
+				}
 			} else {
 				conv, err := interfaceConv(v)
 				if err != nil {
