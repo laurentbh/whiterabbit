@@ -6,6 +6,24 @@ import (
 	"github.com/laurentbh/whiterabbit"
 )
 
+func TestRelationById(t *testing.T) {
+	LoadFixure([]string{
+		"./fixtures/clean_all.txt",
+		"./fixtures/relation_data2.txt"})
+
+	neo, _ := whiterabbit.Open(Cfg{})
+	defer neo.Close()
+	con, _ := neo.GetConnection()
+	defer con.Close()
+
+	candidate := []interface{}{Ingredient{}, Category{}}
+
+	ret, _ := con.FindNodesClause(Ingredient{}, map[string]interface{}{"Name": "potato"}, whiterabbit.Exact)
+	potato, _ := ret[0].(Ingredient)
+	con.RelationByNodeID(potato.ID, candidate)
+	// TODO: find somethhing to test where order is unpredictable
+
+}
 func TestRelation(t *testing.T) {
 	LoadFixure([]string{
 		"./fixtures/clean_all.txt",
@@ -37,5 +55,4 @@ func TestRelation(t *testing.T) {
 			t.Errorf("wrong struct in to, got %v", r.To)
 		}
 	}
-
 }

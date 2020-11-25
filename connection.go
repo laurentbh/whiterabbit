@@ -266,6 +266,7 @@ func (con *Connection) FindNodesClause(nodeType interface{}, where map[string]in
 				case Regexp:
 					builder.WriteString(" =~ ")
 				case Exact:
+					builder.WriteString(" = ")
 				default:
 					builder.WriteString(" = ")
 				}
