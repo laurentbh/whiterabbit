@@ -49,7 +49,7 @@ func ConvertNode(node neo4j.Node, candidates []interface{}) (interface{}, error)
 
 	// prepare additional labels (anything not in rValue)
 	addLabels := make(map[string]string)
-	for k, v := range node.Props() {
+	for k, v := range node.Props {
 		// TODO: decide if we keep this matching between neo4j and my struct
 		upperK := strings.ToUpper(k[:1]) + k[1:]
 		fieldVal := copyValue.FieldByName(upperK)
