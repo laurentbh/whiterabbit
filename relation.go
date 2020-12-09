@@ -41,7 +41,7 @@ func (con *Connection) RelationByNodeID(id int64, candidates []interface{}) ([]R
 			return ret, err
 		}
 		neoRel, _ := record.GetByIndex(1).(neo4j.Relationship)
-		rel.Relation = neoRel.Type()
+		rel.Relation = neoRel.Type
 		ret = append(ret, rel)
 	}
 	return ret, nil
