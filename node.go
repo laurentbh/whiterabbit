@@ -29,7 +29,7 @@ func ConvertNode(node neo4j.Node, candidates []interface{}) (interface{}, error)
 	}
 	// verify node is in the candidates
 	// TODO: handle nodes with multiple labels
-	expectedType := node.Labels()[0]
+	expectedType := node.Labels[0]
 	var candIdx int = -1
 
 	for i, c := range candidateType {
