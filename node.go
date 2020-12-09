@@ -66,7 +66,7 @@ func ConvertNode(node neo4j.Node, candidates []interface{}) (interface{}, error)
 	model := copyValue.FieldByName("Model")
 	if (model != reflect.Value{}) {
 		idField := model.FieldByName("ID")
-		idField.SetInt(node.Id())
+		idField.SetInt(node.Id)
 		labField := model.FieldByName("Labels")
 		addLabelsValue := reflect.ValueOf(addLabels)
 		labField.Set(addLabelsValue)
