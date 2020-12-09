@@ -6,7 +6,7 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/neo4j/neo4j-go-driver/neo4j"
+	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 )
 
 // ConvertNode converts neo4j node into one of the candidate struct
@@ -29,7 +29,7 @@ func ConvertNode(node neo4j.Node, candidates []interface{}) (interface{}, error)
 	}
 	// verify node is in the candidates
 	// TODO: handle nodes with multiple labels
-	expectedType := node.Labels()[0]
+	expectedType := node.Labels[0]
 	var candIdx int = -1
 
 	for i, c := range candidateType {
@@ -49,7 +49,7 @@ func ConvertNode(node neo4j.Node, candidates []interface{}) (interface{}, error)
 
 	// prepare additional labels (anything not in rValue)
 	addLabels := make(map[string]string)
-	for k, v := range node.Props() {
+	for k, v := range node.Props {
 		// TODO: decide if we keep this matching between neo4j and my struct
 		upperK := strings.ToUpper(k[:1]) + k[1:]
 		fieldVal := copyValue.FieldByName(upperK)
@@ -66,7 +66,7 @@ func ConvertNode(node neo4j.Node, candidates []interface{}) (interface{}, error)
 	model := copyValue.FieldByName("Model")
 	if (model != reflect.Value{}) {
 		idField := model.FieldByName("ID")
-		idField.SetInt(node.Id())
+		idField.SetInt(node.Id)
 		labField := model.FieldByName("Labels")
 		addLabelsValue := reflect.ValueOf(addLabels)
 		labField.Set(addLabelsValue)
