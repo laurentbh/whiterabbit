@@ -6,7 +6,7 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/neo4j/neo4j-go-driver/neo4j"
+	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 )
 
 // ConvertNode converts neo4j node into one of the candidate struct
