@@ -15,10 +15,7 @@ func Open(cfg Config) (*DB, error) {
 
 	uri := "bolt://" + cfg.GetHost() + ":" + strconv.Itoa(cfg.GetPort())
 	driver, err := neo4j.NewDriver(uri,
-		neo4j.BasicAuth(cfg.GetUser(), cfg.GetPassword(), ""),
-		func(c *neo4j.Config) {
-			c.Encrypted = cfg.GetEncrypted()
-		})
+		neo4j.BasicAuth(cfg.GetUser(), cfg.GetPassword(), ""))
 	if err != nil {
 		return nil, err
 	}
