@@ -71,11 +71,11 @@ func (con *Connection) MatchRelation(name string, candidates []interface{}) ([]R
 		// 	fmt.Printf("\t\t%#v\n", n.Props())
 		// }
 
-		rel.From, err = ConvertNode(path.Nodes()[0], candidates)
+		rel.From, err = ConvertNode(path.Nodes[0], candidates)
 		if err != nil {
 			return ret, err
 		}
-		rel.To, err = ConvertNode(path.Nodes()[1], candidates)
+		rel.To, err = ConvertNode(path.Nodes[1], candidates)
 		if err != nil {
 			return ret, err
 		}
