@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/neo4j/neo4j-go-driver/neo4j"
+	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 )
 
 type Connection struct {
@@ -136,7 +136,7 @@ func (con *Connection) CreateNode(value interface{}) (int64, neo4j.Result, error
 			if !ok {
 				return 0, nil, errors.New("can't convert neo4j node")
 			}
-			return node.Id(), result, nil
+			return node.Id, result, nil
 		}
 		return 0, nil, errors.New("can't get record")
 	} else {

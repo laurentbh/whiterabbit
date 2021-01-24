@@ -3,7 +3,7 @@ package whiterabbit
 import (
 	"strconv"
 
-	"github.com/neo4j/neo4j-go-driver/neo4j"
+	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 )
 
 // Relation ...
@@ -41,7 +41,7 @@ func (con *Connection) RelationByNodeID(id int64, candidates []interface{}) ([]R
 			return ret, err
 		}
 		neoRel, _ := record.GetByIndex(1).(neo4j.Relationship)
-		rel.Relation = neoRel.Type()
+		rel.Relation = neoRel.Type
 		ret = append(ret, rel)
 	}
 	return ret, nil
@@ -71,11 +71,11 @@ func (con *Connection) MatchRelation(name string, candidates []interface{}) ([]R
 		// 	fmt.Printf("\t\t%#v\n", n.Props())
 		// }
 
-		rel.From, err = ConvertNode(path.Nodes()[0], candidates)
+		rel.From, err = ConvertNode(path.Nodes[0], candidates)
 		if err != nil {
 			return ret, err
 		}
-		rel.To, err = ConvertNode(path.Nodes()[1], candidates)
+		rel.To, err = ConvertNode(path.Nodes[1], candidates)
 		if err != nil {
 			return ret, err
 		}
