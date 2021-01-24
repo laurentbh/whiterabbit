@@ -6,6 +6,12 @@ type Model struct {
 	Labels map[string]string `json:"attribute,omitempty"` // any label not defined mapping struct
 }
 
-func (m Model) SetId(id int64) {
+// SetId ...
+func (m *Model) SetId(id int64) {
 	m.ID = id
+}
+
+// GetId ...
+func (m Model) GetId() int64 {
+	return m.ID
 }
