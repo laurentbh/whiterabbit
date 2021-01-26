@@ -12,6 +12,8 @@ type Mapping struct {
 	Label      string
 	Attributes map[string]string
 	Values     map[string]interface{}
+	// the map from whiterabbit.model
+	Model map[string]string
 }
 
 // Convert neo4j record to a struct
@@ -74,6 +76,19 @@ func GetMapping(input interface{}) (Mapping, error) {
 				return mapping, err
 			}
 			mapping.Values[fieldType.Name] = val
+		} else {
+			modelLabels := val.Field(i).FieldByName("Labels")
+			//fmt.Printf("modelLabels %v  kind:%v\n", modelLabels, modelLabels.Kind())
+
+			keys := modelLabels.MapKeys()
+			mapping.Model = make(map[string]string, len(keys))
+			destVal := reflect.ValueOf(mapping.Model)
+			for _, key := range keys {
+				v := modelLabels.MapIndex(key)
+				//fmt.Printf("key[%v] => %v", key, v)
+				destVal.SetMapIndex(key, v)
+
+			}
 		}
 	}
 	return mapping, nil
