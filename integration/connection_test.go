@@ -1,6 +1,7 @@
 package integration
 
 import (
+	"fmt"
 	"math/rand"
 	"strconv"
 	"testing"
@@ -34,10 +35,54 @@ func TestCreateNode(t *testing.T) {
 
 	u := User{Name: "user1"}
 	u.Model.Labels = make(map[string]string)
+	u.Model.ID = 123
 	u.Model.Labels = map[string]string{"label1": "value1", "label2": "value2"}
 	_, _, err := con.CreateNode(u)
 	if err != nil {
 		t.Errorf("TestCreateNode: %v", err)
+	}
+}
+func TestDeleteNode(t *testing.T) {
+	LoadFixure([]string{"./fixtures/clean_all.txt"})
+
+	neo, _ := whiterabbit.Open(Cfg{})
+	defer neo.Close()
+	con, _ := neo.GetConnection()
+	defer con.Close()
+
+	u := User{Name: "user"}
+	_, _, err := con.CreateNode(u)
+	if err != nil {
+		t.Errorf("TestDeleteNode: %v", err)
+	}
+	u = User{Name: "user2"}
+	// whiterabbit.Model.Labels: map[string]string{"lol": "lol"}}
+	u.Labels = make(map[string]string)
+	u.Labels["label1"] = "value1"
+	u.Labels["label2"] = "value2"
+
+	fmt.Printf("label  " + u.Labels["label2"])
+	_, _, err = con.CreateNode(u)
+	if err != nil {
+		t.Errorf("TestDeleteNode: %v", err)
+	}
+	where := map[string]interface{}{"Name": "user2"}
+	ret, err := con.FindNodesClause(User{}, where, whiterabbit.StartsWith)
+	if err != nil {
+		t.Errorf("findNodes %v", err)
+	}
+	fecthed := ret[0].(User)
+
+	err = con.DeleteNode(fecthed)
+	if err != nil {
+		t.Errorf("TestDeleteNode: %v", err)
+	}
+	ret, err = con.FindNodesClause(User{}, where, whiterabbit.StartsWith)
+	if err != nil {
+		t.Errorf("findNodes %v", err)
+	}
+	if ret != nil {
+		t.Errorf("TestDeleteNode: %v", err)
 	}
 }
 func TestCreateFetchNode(t *testing.T) {

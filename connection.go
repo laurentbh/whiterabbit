@@ -189,6 +189,22 @@ func createNodeCypher(mapping Mapping) (ret string) {
 	return
 }
 
+// DeleteNode ...
+func (con *Connection) DeleteNode(node interface{}) error {
+	mapping, err := GetMapping(node)
+	if err != nil {
+		return err
+	}
+	var sb strings.Builder
+	sb.WriteString("MATCH (n:")
+	sb.WriteString(mapping.Label)
+	sb.WriteString(") WHERE ID(n) =")
+	sb.WriteString(strconv.FormatInt(mapping.ID, 10))
+	sb.WriteString(" OPTIONAL MATCH (n)-[r]-() DELETE r,n")
+
+	return con.Execute(sb.String(), map[string]interface{}{})
+}
+
 // FindByProperty find all node with given property containg value
 func (con *Connection) FindByProperty(property string, value string, candidate []interface{}) ([]interface{}, error) {
 	var builder strings.Builder

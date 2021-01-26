@@ -12,7 +12,8 @@ type Mapping struct {
 	Label      string
 	Attributes map[string]string
 	Values     map[string]interface{}
-	// the map from whiterabbit.model
+	// from whiterabbit.model
+	ID    int64
 	Model map[string]string
 }
 
@@ -77,6 +78,8 @@ func GetMapping(input interface{}) (Mapping, error) {
 			}
 			mapping.Values[fieldType.Name] = val
 		} else {
+			modelID := val.Field(i).FieldByName("ID")
+			mapping.ID = modelID.Int()
 			modelLabels := val.Field(i).FieldByName("Labels")
 			//fmt.Printf("modelLabels %v  kind:%v\n", modelLabels, modelLabels.Kind())
 
