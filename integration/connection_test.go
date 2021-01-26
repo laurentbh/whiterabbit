@@ -9,7 +9,7 @@ import (
 )
 
 func TestConstraint(t *testing.T) {
-	LoadFixure([]string{"./fixtures/clean_all.txt"})
+	LoadFixure([]string{"./fixtures/clean_all.txt", "./fixtures/delete_constraint.txt"})
 	neo, _ := whiterabbit.Open(Cfg{})
 	defer neo.Close()
 	con, _ := neo.GetConnection()
