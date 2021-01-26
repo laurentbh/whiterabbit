@@ -3,6 +3,8 @@ package whiterabbit
 import (
 	"encoding/json"
 	"testing"
+
+	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 )
 
 func TestJSON(t *testing.T) {
@@ -30,10 +32,10 @@ func TestJSON(t *testing.T) {
 }
 func TestConvertNode(t *testing.T) {
 
-	mock := MockNode{
-		id:         6,
-		mockLabels: []string{"TestStruct"},
-		mockProps: map[string]interface{}{
+	mock := neo4j.Node{
+		Id:     6,
+		Labels: []string{"TestStruct"},
+		Props: map[string]interface{}{
 			"A":        (int64)(123), // neo4j returns all int as int64
 			"B":        "valueForB",
 			"C":        3.14,
@@ -74,21 +76,4 @@ func TestConvertNode(t *testing.T) {
 			}
 		}
 	}
-}
-
-type MockNode struct {
-	id         int64
-	mockLabels []string
-	mockProps  map[string]interface{}
-}
-
-func (m MockNode) Id() int64 {
-	return m.id
-}
-func (m MockNode) Labels() []string {
-	return m.mockLabels
-}
-
-func (m MockNode) Props() map[string]interface{} {
-	return m.mockProps
 }
