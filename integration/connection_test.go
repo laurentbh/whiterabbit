@@ -33,6 +33,8 @@ func TestCreateNode(t *testing.T) {
 	defer con.Close()
 
 	u := User{Name: "user1"}
+	u.Model.Labels = make(map[string]string)
+	u.Model.Labels = map[string]string{"label1": "value1", "label2": "value2"}
 	_, _, err := con.CreateNode(u)
 	if err != nil {
 		t.Errorf("TestCreateNode: %v", err)

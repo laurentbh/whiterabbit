@@ -115,11 +115,16 @@ func (con *Connection) CreateNode(value interface{}) (int64, neo4j.Result, error
 	}
 	cyp := createNodeCypher(mapping)
 
+	values := mapping.Values
+	for k, v := range mapping.Model {
+		values[k] = v
+	}
+
 	var result neo4j.Result
 	if con.transaction == nil {
-		result, err = con.session.Run(cyp, mapping.Values)
+		result, err = con.session.Run(cyp, values)
 	} else {
-		result, err = con.transaction.Run(cyp, mapping.Values)
+		result, err = con.transaction.Run(cyp, values)
 	}
 	if err != nil {
 		return 0, nil, err
@@ -155,8 +160,8 @@ func createNodeCypher(mapping Mapping) (ret string) {
 	}
 	builder.WriteString("{")
 
+	sep := false
 	if len(mapping.Attributes) > 0 {
-		sep := false
 		for k := range mapping.Attributes {
 			if sep {
 				builder.WriteString(", ")
@@ -166,6 +171,18 @@ func createNodeCypher(mapping Mapping) (ret string) {
 			builder.WriteString(k)
 			sep = true
 		}
+	}
+	if len(mapping.Model) > 0 {
+		for k := range mapping.Model {
+			if sep {
+				builder.WriteString(", ")
+			}
+			builder.WriteString(k)
+			builder.WriteString(": $")
+			builder.WriteString(k)
+			sep = true
+		}
+
 	}
 	builder.WriteString("}) RETURN n")
 	ret = builder.String()
