@@ -205,6 +205,16 @@ func (con *Connection) DeleteNode(node interface{}) error {
 	return con.Execute(sb.String(), map[string]interface{}{})
 }
 
+// DeleteByID delete any node by ID
+func (con *Connection) DeleteByID(id int64) error {
+	var sb strings.Builder
+
+	sb.WriteString("MATCH (n) where id(n) = ")
+	sb.WriteString(strconv.FormatInt(id, 10))
+	sb.WriteString(" DETACH DELETE n")
+	return con.Execute(sb.String(), map[string]interface{}{})
+}
+
 // FindByProperty find all node with given property containg value
 func (con *Connection) FindByProperty(property string, value string, candidate []interface{}) ([]interface{}, error) {
 	var builder strings.Builder
