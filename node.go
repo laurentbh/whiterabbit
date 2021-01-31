@@ -102,6 +102,29 @@ func setValueNeoToStruct(fv *reflect.Value, value interface{}) error {
 			return fmt.Errorf("can't convert [%v] to int64", value)
 		}
 		return nil
+	case reflect.Slice:
+		v2 := reflect.ValueOf(value)
+		// length of value
+		len := v2.Len()
+		if len == 0 {
+			return nil
+		}
+		first := v2.Index(0)
+		// type of inner type
+		switch reflect.TypeOf(first.Interface()).Kind() {
+		case reflect.String:
+			// alloc slice of strings
+			fv.Set( reflect.MakeSlice(reflect.TypeOf([]string{}), len, len))
+			// copy elements
+			for i:=0; i<len; i++ {
+				fv.Index(i).Set(reflect.ValueOf(v2.Index(i).Interface()))
+			}
+			return nil
+		default:
+			msg := fmt.Sprintf("setValue for %s of %s is not implemented", fv.Kind(),
+				reflect.TypeOf(first.Interface()).Kind())
+			return errors.New(msg)
+		}
 	default:
 		msg := fmt.Sprintf("setValue for %s is not implemented", fv.Kind())
 		return errors.New(msg)

@@ -105,6 +105,17 @@ func getValue(v reflect.Value) (interface{}, error) {
 		return v.Interface().(string), nil
 	case reflect.Float64:
 		return v.Interface().(float64), nil
+	case reflect.Slice:
+		switch v.Type().String() {
+		case "[]string":
+			tmp := make([]string, v.Len())
+			for  i:=0; i< v.Len(); i++ {
+				tmp[i] = (v.Index(i).Interface()).(string)
+			}
+			return tmp, nil
+		}
+		msg := fmt.Sprintf("getValue for %v is not implemented", v.Type().String())
+		return "", errors.New(msg)
 	}
 	msg := fmt.Sprintf("getValue for %v is not implemented", v.Kind())
 	return "", errors.New(msg)

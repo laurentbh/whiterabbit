@@ -19,4 +19,5 @@ type User struct {
 	whiterabbit.Model
 	Name string
 	Age  int
+	Nickname []string
 }

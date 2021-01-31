@@ -1,7 +1,7 @@
 package integration
 
 import (
-	"fmt"
+	"github.com/google/go-cmp/cmp"
 	"math/rand"
 	"strconv"
 	"testing"
@@ -37,6 +37,9 @@ func TestCreateNode(t *testing.T) {
 	u.Model.Labels = make(map[string]string)
 	u.Model.ID = 123
 	u.Model.Labels = map[string]string{"label1": "value1", "label2": "value2"}
+	u.Nickname = make([]string,2)
+	u.Nickname[0] = "first"
+	u.Nickname[1] = "second"
 	_, _, err := con.CreateNode(u)
 	if err != nil {
 		t.Errorf("TestCreateNode: %v", err)
@@ -61,7 +64,6 @@ func TestDeleteNode(t *testing.T) {
 	u.Labels["label1"] = "value1"
 	u.Labels["label2"] = "value2"
 
-	fmt.Printf("label  " + u.Labels["label2"])
 	_, _, err = con.CreateNode(u)
 	if err != nil {
 		t.Errorf("TestDeleteNode: %v", err)
@@ -95,8 +97,8 @@ func TestCreateFetchNode(t *testing.T) {
 
 	// create dummy user
 	userName := "user " + strconv.FormatInt(rand.Int63n(100), 10)
-	s := User{Name: userName, Age: 19}
-	_, _, err := con.CreateNode(s)
+	inUser := User{Name: userName, Age: 19, Nickname: []string{"one","two"}}
+	_, _, err := con.CreateNode(inUser)
 	if err != nil {
 		panic(err)
 	}
@@ -113,8 +115,14 @@ func TestCreateFetchNode(t *testing.T) {
 	if ok == false {
 		t.Error("findNodes return type is not a User")
 	}
-	if retUser.Name != userName {
-		t.Error("findNodes return wrong User")
+	if inUser.Name != retUser.Name {
+		t.Errorf("TestCreateFetchNode failed on user.Name")
+	}
+	if inUser.Age != retUser.Age {
+		t.Errorf("TestCreateFetchNode failed on user.Age")
+	}
+	if ! cmp.Equal(retUser.Nickname, inUser.Nickname) {
+		t.Errorf("TestCreateFetchNode failed on user.Nickanme [slice of string]")
 	}
 }
 
