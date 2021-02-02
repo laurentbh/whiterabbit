@@ -91,6 +91,15 @@ func setValueNeoToStruct(fv *reflect.Value, value interface{}) error {
 		if ok {
 			fv.SetFloat(conv)
 		} else {
+			// edge case, if float value as no decimal part, it's returned as int by neo4j
+			if reflect.TypeOf(value).Kind() == reflect.Int {
+				conv2, ok := value.(int)
+				if ok {
+					fv.SetFloat(float64(conv2))
+					return nil
+				}
+
+			}
 			return fmt.Errorf("can't convert [%v] to float", value)
 		}
 		return nil

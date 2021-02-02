@@ -31,7 +31,6 @@ func TestJSON(t *testing.T) {
 	}
 }
 func TestConvertNode(t *testing.T) {
-
 	mock := neo4j.Node{
 		Id:     6,
 		Labels: []string{"TestStruct"},
@@ -73,6 +72,29 @@ func TestConvertNode(t *testing.T) {
 				if tmpV != "label2Value" {
 					t.Errorf("model.Labels[\"label2\"] is %s, should be label2Value", tmpV)
 				}
+			}
+		}
+	}
+}
+func TestConvertFloat(t *testing.T) {
+	mock := neo4j.Node{
+		Id:     6,
+		Labels: []string{"TestStruct"},
+		Props: map[string]interface{}{
+			"C":        3},
+	}
+	var candidate []interface{}
+	candidate = append(candidate, TestStruct{})
+	ret, err := ConvertNode(mock, candidate)
+	if err != nil {
+		t.Errorf("TestConvertNode : %s", err)
+	} else {
+		r, ok := ret.(TestStruct)
+		if !ok {
+			t.Errorf("expecting a TestStruct")
+		} else {
+			if r.C != 3 {
+				t.Errorf("assignement error ")
 			}
 		}
 	}
