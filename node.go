@@ -92,8 +92,8 @@ func setValueNeoToStruct(fv *reflect.Value, value interface{}) error {
 			fv.SetFloat(conv)
 		} else {
 			// edge case, if float value as no decimal part, it's returned as int by neo4j
-			if reflect.TypeOf(value).Kind() == reflect.Int {
-				conv2, ok := value.(int)
+			if reflect.TypeOf(value).Kind() == reflect.Int64 {
+				conv2, ok := value.(int64)
 				if ok {
 					fv.SetFloat(float64(conv2))
 					return nil

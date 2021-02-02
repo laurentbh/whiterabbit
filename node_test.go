@@ -77,11 +77,13 @@ func TestConvertNode(t *testing.T) {
 	}
 }
 func TestConvertFloat(t *testing.T) {
+	var val int64
+	val =3
 	mock := neo4j.Node{
 		Id:     6,
 		Labels: []string{"TestStruct"},
 		Props: map[string]interface{}{
-			"C":        3},
+			"C":        val},
 	}
 	var candidate []interface{}
 	candidate = append(candidate, TestStruct{})
