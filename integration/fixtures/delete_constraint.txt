@@ -1,1 +1,1 @@
-DROP CONSTRAINT cat_name_unique
+DROP CONSTRAINT cat_name_unique IF EXISTS

@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/laurentbh/whiterabbit/internal/mapping"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 )
 
@@ -109,7 +110,7 @@ func (con *Connection) InTransaction(f func(con *Connection) ([]neo4j.Result, er
 // - neo4j.Result to be consumed when in a transaction
 // - error
 func (con *Connection) CreateNode(value interface{}) (int64, neo4j.Result, error) {
-	mapping, err := GetMapping(value)
+	mapping, err := mapping.GetMapping(value)
 	if err != nil {
 		return 0, nil, err
 	}
@@ -149,7 +150,7 @@ func (con *Connection) CreateNode(value interface{}) (int64, neo4j.Result, error
 	}
 }
 
-func createNodeCypher(mapping Mapping) (ret string) {
+func createNodeCypher(mapping mapping.Mapping) (ret string) {
 	var builder strings.Builder
 	builder.WriteString("CREATE (n:")
 	builder.WriteString(mapping.Label)
@@ -191,7 +192,7 @@ func createNodeCypher(mapping Mapping) (ret string) {
 
 // DeleteNode ...
 func (con *Connection) DeleteNode(node interface{}) error {
-	mapping, err := GetMapping(node)
+	mapping, err := mapping.GetMapping(node)
 	if err != nil {
 		return err
 	}
@@ -232,7 +233,7 @@ func (con *Connection) FindByProperty(property string, value string, candidate [
 
 // FindAllNodes finds all nodes of a given type
 func (con *Connection) FindAllNodes(nodeType interface{}) ([]interface{}, error) {
-	mapping, _ := GetMapping(nodeType)
+	mapping, _ := mapping.GetMapping(nodeType)
 
 	var builder strings.Builder
 	builder.WriteString("MATCH (n:")
@@ -281,7 +282,7 @@ const (
 // FindNodesClause finds all nodes of a given type
 // searchMode is applied for all string
 func (con *Connection) FindNodesClause(nodeType interface{}, where map[string]interface{}, mode SearchMode) ([]interface{}, error) {
-	mapping, err := GetMapping(nodeType)
+	mapping, err := mapping.GetMapping(nodeType)
 	if err != nil {
 		return nil, err
 	}

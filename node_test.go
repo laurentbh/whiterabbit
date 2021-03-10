@@ -7,6 +7,13 @@ import (
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 )
 
+type test struct {
+	Model
+	A int
+	B string
+	C float64
+}
+
 func TestJSON(t *testing.T) {
 
 	type testForJSON struct {
@@ -33,7 +40,7 @@ func TestJSON(t *testing.T) {
 func TestConvertNode(t *testing.T) {
 	mock := neo4j.Node{
 		Id:     6,
-		Labels: []string{"TestStruct"},
+		Labels: []string{"test"},
 		Props: map[string]interface{}{
 			"A":        (int64)(123), // neo4j returns all int as int64
 			"B":        "valueForB",
@@ -42,14 +49,14 @@ func TestConvertNode(t *testing.T) {
 			"label2":   "label2Value"},
 	}
 	var candidate []interface{}
-	candidate = append(candidate, TestStruct{})
+	candidate = append(candidate, test{})
 	ret, err := ConvertNode(mock, candidate)
 	if err != nil {
 		t.Errorf("TestConvertNode : %s", err)
 	} else {
-		r, ok := ret.(TestStruct)
+		r, ok := ret.(test)
 		if !ok {
-			t.Errorf("expecting a TestStruct")
+			t.Errorf("expecting a test")
 		} else {
 			if r.A != 123 || r.B != "valueForB" || r.C != 3.14 {
 				t.Errorf("assignement error ")
@@ -78,22 +85,22 @@ func TestConvertNode(t *testing.T) {
 }
 func TestConvertFloat(t *testing.T) {
 	var val int64
-	val =3
+	val = 3
 	mock := neo4j.Node{
 		Id:     6,
-		Labels: []string{"TestStruct"},
+		Labels: []string{"test"},
 		Props: map[string]interface{}{
-			"C":        val},
+			"C": val},
 	}
 	var candidate []interface{}
-	candidate = append(candidate, TestStruct{})
+	candidate = append(candidate, test{})
 	ret, err := ConvertNode(mock, candidate)
 	if err != nil {
 		t.Errorf("TestConvertNode : %s", err)
 	} else {
-		r, ok := ret.(TestStruct)
+		r, ok := ret.(test)
 		if !ok {
-			t.Errorf("expecting a TestStruct")
+			t.Errorf("expecting a test")
 		} else {
 			if r.C != 3 {
 				t.Errorf("assignement error ")
