@@ -244,7 +244,7 @@ func (con *Connection) FindAllNodes(nodeType interface{}) ([]interface{}, error)
 	return ret, err
 }
 
-func (con *Connection) findNodeHelper(cypher string, candidate []interface{}) ([]interface{}, error) {
+func (con *Connection) findNodeHelper(cypher string, candidate ...interface{}) ([]interface{}, error) {
 	// fmt.Println(cypher)
 	result, err := con.GetSession().Run(cypher,
 		map[string]interface{}{})

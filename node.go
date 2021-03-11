@@ -10,7 +10,7 @@ import (
 )
 
 // ConvertNode converts neo4j node into one of the candidate struct
-func ConvertNode(node neo4j.Node, candidates []interface{}) (interface{}, error) {
+func ConvertNode(node neo4j.Node, candidates ...interface{}) (interface{}, error) {
 
 	var candidateType []string
 	// build list of type while making sure all candidates are struct
@@ -123,9 +123,9 @@ func setValueNeoToStruct(fv *reflect.Value, value interface{}) error {
 		switch reflect.TypeOf(first.Interface()).Kind() {
 		case reflect.String:
 			// alloc slice of strings
-			fv.Set( reflect.MakeSlice(reflect.TypeOf([]string{}), len, len))
+			fv.Set(reflect.MakeSlice(reflect.TypeOf([]string{}), len, len))
 			// copy elements
-			for i:=0; i<len; i++ {
+			for i := 0; i < len; i++ {
 				fv.Index(i).Set(reflect.ValueOf(v2.Index(i).Interface()))
 			}
 			return nil
