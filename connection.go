@@ -2,6 +2,7 @@ package whiterabbit
 
 import (
 	"errors"
+	"fmt"
 	"reflect"
 	"strconv"
 	"strings"
@@ -38,7 +39,8 @@ func (con *Connection) SetUniqueConstraint(label interface{}, field string, cons
 	// and field is a field of the struct
 	_, ok := val.Type().FieldByName(field)
 	if ok == false {
-		return errors.New("field is not in struct")
+		structType := val.Type()
+		return fmt.Errorf("%s is not a field of %s", field, structType.Name())
 	}
 	sb := strings.Builder{}
 	// CREATE CONSTRAINT unique_test
@@ -140,13 +142,13 @@ func (con *Connection) CreateNode(value interface{}) (int64, neo4j.Result, error
 		if ok {
 			node, ok := nodeI.(neo4j.Node)
 			if !ok {
-				return 0, nil, errors.New("can't convert neo4j node")
+				return 0, nil, errors.New("CreateNode: can't convert to a neo4j Node")
 			}
 			return node.Id, result, nil
 		}
-		return 0, nil, errors.New("can't get record")
+		return 0, nil, errors.New("CreateNode: can't get record")
 	} else {
-		return 0, nil, errors.New("can't get result")
+		return 0, nil, errors.New("CreateNode: can't get result")
 	}
 }
 
@@ -228,8 +230,7 @@ func (con *Connection) FindByProperty(property string, value string, candidate [
 	builder.WriteString(value)
 	builder.WriteString("\" RETURN DISTINCT n")
 
-	ret, err := con.findNodeHelper(builder.String(), candidate)
-	return ret, err
+	return con.findNodeHelper(builder.String(), candidate)
 }
 
 // FindAllNodes finds all nodes of a given type
@@ -240,12 +241,10 @@ func (con *Connection) FindAllNodes(nodeType interface{}) ([]interface{}, error)
 	builder.WriteString("MATCH (n:")
 	builder.WriteString(mapping.Label)
 	builder.WriteString(") RETURN n")
-	ret, err := con.findNodeHelper(builder.String(), []interface{}{nodeType})
-	return ret, err
+	return con.findNodeHelper(builder.String(), nodeType)
 }
 
-func (con *Connection) findNodeHelper(cypher string, candidate ...interface{}) ([]interface{}, error) {
-	// fmt.Println(cypher)
+func (con *Connection) findNodeHelper(cypher string, candidate interface{}) ([]interface{}, error) {
 	result, err := con.GetSession().Run(cypher,
 		map[string]interface{}{})
 	if err != nil {
@@ -348,11 +347,7 @@ func (con *Connection) FindNodesClause(nodeType interface{}, where map[string]in
 	}
 	builder.WriteString(" RETURN n")
 
-	ret, err := con.findNodeHelper(builder.String(), nodeType)
-	if err != nil {
-		return nil, err
-	}
-	return ret, nil
+	return con.findNodeHelper(builder.String(), nodeType)
 }
 func interfaceConv(i interface{}) (string, error) {
 	conv, ok := i.(int)

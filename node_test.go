@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
+	"github.com/stretchr/testify/assert"
 )
 
 type test struct {
@@ -12,6 +13,11 @@ type test struct {
 	A int
 	B string
 	C float64
+}
+
+type test2 struct {
+	Model
+	A int
 }
 
 func TestJSON(t *testing.T) {
@@ -27,15 +33,14 @@ func TestJSON(t *testing.T) {
 	test := testForJSON{Model: m, Name: "nobody", Age: 12}
 
 	bytePayload, err := json.Marshal(test)
-	if err != nil {
-		t.Errorf("shouldn't produce error [%s]", err)
-	}
+	assert.Nil(t, err, "should not error")
+
 	var res testForJSON
 	err = json.Unmarshal(bytePayload, &res)
 
-	if res.Model.ID != 475 || res.Model.Labels["one"] != "1" {
-		t.Errorf("error processing")
-	}
+	var expectedID int64 = 475
+	assert.Equal(t, expectedID, res.Model.ID, "wrong value for Model ID")
+	assert.Equal(t, "1", res.Model.Labels["one"], "wrong value for Model Label")
 }
 func TestConvertNode(t *testing.T) {
 	mock := neo4j.Node{
@@ -48,40 +53,51 @@ func TestConvertNode(t *testing.T) {
 			"newLabel": "newValue",
 			"label2":   "label2Value"},
 	}
-	var candidate []interface{}
-	candidate = append(candidate, test{})
-	ret, err := ConvertNode(mock, candidate)
-	if err != nil {
-		t.Errorf("TestConvertNode : %s", err)
-	} else {
-		r, ok := ret.(test)
-		if !ok {
-			t.Errorf("expecting a test")
-		} else {
-			if r.A != 123 || r.B != "valueForB" || r.C != 3.14 {
-				t.Errorf("assignement error ")
-			} else {
-				// testing model
-				if r.Model.ID != 6 {
-					t.Errorf("model id error")
-				}
-				tmpV, ok := r.Labels["newLabel"]
-				if ok == false {
-					t.Errorf("newLabel key missing")
-				}
-				if tmpV != "newValue" {
-					t.Errorf("model.Labels[\"newLabel\"] is %s, should be newValue", tmpV)
-				}
-				tmpV, ok = r.Labels["label2"]
-				if ok == false {
-					t.Errorf("label2 key missing")
-				}
-				if tmpV != "label2Value" {
-					t.Errorf("model.Labels[\"label2\"] is %s, should be label2Value", tmpV)
-				}
-			}
-		}
+	ret, err := ConvertNode(mock, test{})
+	assert.Nil(t, err, "should not return error")
+	assert.IsType(t, test{}, ret, "wrong return type")
+
+	assert.Equal(t, 123, (ret.(test)).A, "wrong value for filed A")
+	assert.Equal(t, "valueForB", (ret.(test)).B, "wrong value for field B")
+	assert.Equal(t, 3.14, (ret.(test)).C, "wrong value for field C")
+
+	var expectedID int64 = 6
+	assert.Equal(t, expectedID, (ret.(test)).Model.ID, "wrong value for ID")
+	assert.Equal(t, "newValue", (ret.(test)).Labels["newLabel"], "wrong value for newLabel")
+	assert.Equal(t, "label2Value", (ret.(test)).Labels["label2"], "wrong value for label2Value")
+}
+func TestConvertNodeError(t *testing.T) {
+	mock := neo4j.Node{
+		Id:     6,
+		Labels: []string{"test"},
+		Props: map[string]interface{}{
+			"A":        (int64)(123), // neo4j returns all int as int64
+			"B":        "valueForB",
+			"C":        3.14,
+			"newLabel": "newValue",
+			"label2":   "label2Value"},
 	}
+	_, err := ConvertNode(mock, 1, "should return error")
+	assert.NotNil(t, err)
+
+	_, err = ConvertNode(mock, test{}, 1, "should return error")
+	assert.NotNil(t, err)
+}
+func TestConvertNodeMultipleCandidate(t *testing.T) {
+	mock := neo4j.Node{
+		Id:     6,
+		Labels: []string{"test"},
+		Props: map[string]interface{}{
+			"A":        (int64)(123), // neo4j returns all int as int64
+			"B":        "valueForB",
+			"C":        3.14,
+			"newLabel": "newValue",
+			"label2":   "label2Value"},
+	}
+	ret, err := ConvertNode(mock, test2{}, test{})
+
+	assert.Nil(t, err, "should not return error")
+	assert.IsType(t, test{}, ret, "wrong return type")
 }
 func TestConvertFloat(t *testing.T) {
 	var val int64
@@ -92,19 +108,9 @@ func TestConvertFloat(t *testing.T) {
 		Props: map[string]interface{}{
 			"C": val},
 	}
-	var candidate []interface{}
-	candidate = append(candidate, test{})
-	ret, err := ConvertNode(mock, candidate)
-	if err != nil {
-		t.Errorf("TestConvertNode : %s", err)
-	} else {
-		r, ok := ret.(test)
-		if !ok {
-			t.Errorf("expecting a test")
-		} else {
-			if r.C != 3 {
-				t.Errorf("assignement error ")
-			}
-		}
-	}
+	ret, err := ConvertNode(mock, test{})
+	assert.Nil(t, err, "should not return error")
+	assert.IsType(t, test{}, ret, "wrong return type")
+	var expectedFloat float64 = 3
+	assert.Equal(t, expectedFloat, (ret.(test)).C, "wrong value for field C")
 }

@@ -48,7 +48,7 @@ func (con *Connection) RelationByNodeID(id int64, candidates []interface{}) ([]R
 }
 
 // MatchRelation ...
-func (con *Connection) MatchRelation(name string, candidates []interface{}) ([]Relation, error) {
+func (con *Connection) MatchRelation(name string, candidate interface{}, otherCandidate ...interface{}) ([]Relation, error) {
 
 	cypher := "MATCH p=()-[r:" + name + "]->() RETURN p"
 	result, err := con.GetSession().Run(cypher,
@@ -71,11 +71,11 @@ func (con *Connection) MatchRelation(name string, candidates []interface{}) ([]R
 		// 	fmt.Printf("\t\t%#v\n", n.Props())
 		// }
 
-		rel.From, err = ConvertNode(path.Nodes[0], candidates)
+		rel.From, err = ConvertNode(path.Nodes[0], candidate, otherCandidate...)
 		if err != nil {
 			return ret, err
 		}
-		rel.To, err = ConvertNode(path.Nodes[1], candidates)
+		rel.To, err = ConvertNode(path.Nodes[1], candidate, otherCandidate...)
 		if err != nil {
 			return ret, err
 		}

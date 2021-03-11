@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/laurentbh/whiterabbit"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestRelationById(t *testing.T) {
@@ -21,7 +22,7 @@ func TestRelationById(t *testing.T) {
 	ret, _ := con.FindNodesClause(Ingredient{}, map[string]interface{}{"Name": "potato"}, whiterabbit.Exact)
 	potato, _ := ret[0].(Ingredient)
 	con.RelationByNodeID(potato.ID, candidate)
-	// TODO: find somethhing to test where order is unpredictable
+	// TODO: find something to test where order is unpredictable
 
 }
 func TestRelation(t *testing.T) {
@@ -34,25 +35,16 @@ func TestRelation(t *testing.T) {
 	neo, _ := whiterabbit.Open(Cfg{})
 	defer neo.Close()
 
-	candidate := []interface{}{Ingredient{}, Category{}}
-
 	con, _ := neo.GetConnection()
 	defer con.Close()
 
-	relations, err := con.MatchRelation(relName, candidate)
-	if err != nil {
-		t.Errorf("call to MatchRelation: %s", err)
-	}
-	// fmt.Printf("matches : %v", relations)
+	relations, err := con.MatchRelation(relName, Ingredient{}, Category{})
+	assert.Nil(t, err)
+
 	for _, r := range relations {
-		if r.Relation != relName {
-			t.Errorf("expected relation %s , got %s", relName, r.Relation)
-		}
-		if _, ok := r.From.(Ingredient); ok == false {
-			t.Errorf("wrong struct in from got %v", r.From)
-		}
-		if _, ok := r.To.(Category); ok == false {
-			t.Errorf("wrong struct in to, got %v", r.To)
-		}
+		assert.Equal(t, relName, r.Relation)
+
+		assert.IsType(t, Ingredient{}, r.From)
+		assert.IsType(t, Category{}, r.To)
 	}
 }

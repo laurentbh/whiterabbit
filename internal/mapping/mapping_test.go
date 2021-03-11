@@ -1,6 +1,10 @@
 package mapping
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+)
 
 type test struct {
 	A int
@@ -17,15 +21,14 @@ func TestMappingWithEmptyField(t *testing.T) {
 		Values:     map[string]interface{}{"B": "i am a string"},
 	}
 	mapping, err := GetMapping(input)
-	if err != nil {
-		t.Error("GetMqapping error ", err)
-	}
+	assert.Nil(t, err, "should not return error")
+
 	for k := range expected.Attributes {
 		_, ok := mapping.Attributes[k]
 		if !ok {
 			t.Errorf("missing attribute [%s]", k)
-		} else if mapping.Attributes[k] != expected.Attributes[k] {
-			t.Errorf("attribute error key:[%s] expecting [%s] got [%s]", k, expected.Attributes[k], mapping.Attributes[k])
+		} else {
+			assert.Equal(t, expected.Attributes[k], mapping.Attributes[k])
 		}
 	}
 }
@@ -39,21 +42,17 @@ func TestMapping(t *testing.T) {
 
 	input := test{A: 415, B: "i am a string", C: 3.14}
 	mapping, err := GetMapping(input)
-	if err != nil {
-		t.Error("GetMqapping error ", err)
-	}
 
-	// TODO : find sonething for assertions
-	if mapping.Label != expected.Label {
-		t.Errorf("label error, expecting [%s] got [%s]", expected.Label, mapping.Label)
-	}
+	assert.Nil(t, err, "should not return error")
+
+	assert.Equal(t, expected.Label, mapping.Label, "wrong label")
 
 	for k := range expected.Attributes {
 		_, ok := mapping.Attributes[k]
 		if !ok {
 			t.Errorf("missing attribute [%s]", k)
-		} else if mapping.Attributes[k] != expected.Attributes[k] {
-			t.Errorf("attribute error key:[%s] expecting [%s] got [%s]", k, expected.Attributes[k], mapping.Attributes[k])
+		} else {
+			assert.Equal(t, expected.Attributes[k], mapping.Attributes[k])
 		}
 
 	}
@@ -61,8 +60,5 @@ func TestMapping(t *testing.T) {
 func TestMappingError(t *testing.T) {
 	var i int
 	_, err := GetMapping(i)
-	if err == nil {
-		t.Error("expecting")
-	}
-
+	assert.Nil(t, err)
 }

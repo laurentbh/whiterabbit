@@ -1,0 +1,5 @@
+DROP CONSTRAINT name_unique IF EXISTS;
+
+CREATE CONSTRAINT name_unique ON (n:Test) ASSERT n.Name IS UNIQUE;
+
+CREATE (n:Test{Name: "test1"});
