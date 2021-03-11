@@ -228,7 +228,8 @@ func (con *Connection) FindByProperty(property string, value string, candidate [
 	builder.WriteString(value)
 	builder.WriteString("\" RETURN DISTINCT n")
 
-	return con.findNodeHelper(builder.String(), candidate)
+	ret, err := con.findNodeHelper(builder.String(), candidate)
+	return ret, err
 }
 
 // FindAllNodes finds all nodes of a given type
@@ -239,7 +240,8 @@ func (con *Connection) FindAllNodes(nodeType interface{}) ([]interface{}, error)
 	builder.WriteString("MATCH (n:")
 	builder.WriteString(mapping.Label)
 	builder.WriteString(") RETURN n")
-	return con.findNodeHelper(builder.String(), []interface{}{nodeType})
+	ret, err := con.findNodeHelper(builder.String(), []interface{}{nodeType})
+	return ret, err
 }
 
 func (con *Connection) findNodeHelper(cypher string, candidate []interface{}) ([]interface{}, error) {
@@ -346,7 +348,11 @@ func (con *Connection) FindNodesClause(nodeType interface{}, where map[string]in
 	}
 	builder.WriteString(" RETURN n")
 
-	return con.findNodeHelper(builder.String(), []interface{}{nodeType})
+	ret, err := con.findNodeHelper(builder.String(), nodeType)
+	if err != nil {
+		return nil, err
+	}
+	return ret, nil
 }
 func interfaceConv(i interface{}) (string, error) {
 	conv, ok := i.(int)
