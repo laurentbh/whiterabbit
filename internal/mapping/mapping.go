@@ -1,4 +1,4 @@
-package whiterabbit
+package mapping
 
 import (
 	"errors"
@@ -108,7 +108,7 @@ func getValue(v reflect.Value) (interface{}, error) {
 		switch v.Type().String() {
 		case "[]string":
 			tmp := make([]string, v.Len())
-			for  i:=0; i< v.Len(); i++ {
+			for i := 0; i < v.Len(); i++ {
 				tmp[i] = (v.Index(i).Interface()).(string)
 			}
 			return tmp, nil
@@ -119,6 +119,7 @@ func getValue(v reflect.Value) (interface{}, error) {
 	msg := fmt.Sprintf("getValue for %v is not implemented", v.Kind())
 	return "", errors.New(msg)
 }
+
 //func setValue(v *reflect.Value, targetType string, value string) error {
 //	switch targetType {
 //	case "string":

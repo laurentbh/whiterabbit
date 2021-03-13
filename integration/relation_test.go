@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/laurentbh/whiterabbit"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestRelationById(t *testing.T) {
@@ -16,13 +17,27 @@ func TestRelationById(t *testing.T) {
 	con, _ := neo.GetConnection()
 	defer con.Close()
 
-	candidate := []interface{}{Ingredient{}, Category{}}
-
 	ret, _ := con.FindNodesClause(Ingredient{}, map[string]interface{}{"Name": "potato"}, whiterabbit.Exact)
 	potato, _ := ret[0].(Ingredient)
-	con.RelationByNodeID(potato.ID, candidate)
-	// TODO: find somethhing to test where order is unpredictable
 
+	ret, _ = con.FindNodesClause(Ingredient{}, map[string]interface{}{"Name": "bean"}, whiterabbit.Exact)
+	bean, _ := ret[0].(Ingredient)
+
+	ret, _ = con.FindNodesClause(Category{}, map[string]interface{}{"Name": "vegetable"}, whiterabbit.Exact)
+	vegetable, _ := ret[0].(Category)
+
+	expected := []whiterabbit.Relation{
+		{Relation: "Defined_By",
+			From: potato,
+			To:   vegetable},
+		{Relation: "Like",
+			From: potato,
+			To:   bean},
+	}
+
+	r, err := con.RelationByNodeID(potato.ID, Ingredient{}, Category{})
+	assert.Nil(t, err)
+	assert.ElementsMatch(t, expected, r)
 }
 func TestRelation(t *testing.T) {
 	LoadFixure([]string{
@@ -34,25 +49,16 @@ func TestRelation(t *testing.T) {
 	neo, _ := whiterabbit.Open(Cfg{})
 	defer neo.Close()
 
-	candidate := []interface{}{Ingredient{}, Category{}}
-
 	con, _ := neo.GetConnection()
 	defer con.Close()
 
-	relations, err := con.MatchRelation(relName, candidate)
-	if err != nil {
-		t.Errorf("call to MatchRelation: %s", err)
-	}
-	// fmt.Printf("matches : %v", relations)
+	relations, err := con.MatchRelation(relName, Ingredient{}, Category{})
+	assert.Nil(t, err)
+
 	for _, r := range relations {
-		if r.Relation != relName {
-			t.Errorf("expected relation %s , got %s", relName, r.Relation)
-		}
-		if _, ok := r.From.(Ingredient); ok == false {
-			t.Errorf("wrong struct in from got %v", r.From)
-		}
-		if _, ok := r.To.(Category); ok == false {
-			t.Errorf("wrong struct in to, got %v", r.To)
-		}
+		assert.Equal(t, relName, r.Relation)
+
+		assert.IsType(t, Ingredient{}, r.From)
+		assert.IsType(t, Category{}, r.To)
 	}
 }

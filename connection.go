@@ -2,10 +2,12 @@ package whiterabbit
 
 import (
 	"errors"
+	"fmt"
 	"reflect"
 	"strconv"
 	"strings"
 
+	"github.com/laurentbh/whiterabbit/internal/mapping"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 )
 
@@ -37,7 +39,8 @@ func (con *Connection) SetUniqueConstraint(label interface{}, field string, cons
 	// and field is a field of the struct
 	_, ok := val.Type().FieldByName(field)
 	if ok == false {
-		return errors.New("field is not in struct")
+		structType := val.Type()
+		return fmt.Errorf("%s is not a field of %s", field, structType.Name())
 	}
 	sb := strings.Builder{}
 	// CREATE CONSTRAINT unique_test
@@ -109,7 +112,7 @@ func (con *Connection) InTransaction(f func(con *Connection) ([]neo4j.Result, er
 // - neo4j.Result to be consumed when in a transaction
 // - error
 func (con *Connection) CreateNode(value interface{}) (int64, neo4j.Result, error) {
-	mapping, err := GetMapping(value)
+	mapping, err := mapping.GetMapping(value)
 	if err != nil {
 		return 0, nil, err
 	}
@@ -132,24 +135,23 @@ func (con *Connection) CreateNode(value interface{}) (int64, neo4j.Result, error
 	if result.Err() != nil {
 		return 0, nil, result.Err()
 	}
-
-	if result.Next() {
-		record := result.Record()
-		nodeI, ok := record.Get("n")
-		if ok {
-			node, ok := nodeI.(neo4j.Node)
-			if !ok {
-				return 0, nil, errors.New("can't convert neo4j node")
-			}
-			return node.Id, result, nil
-		}
-		return 0, nil, errors.New("can't get record")
-	} else {
-		return 0, nil, errors.New("can't get result")
+	record, err := result.Single()
+	if err != nil {
+		return 0, nil, err
 	}
+
+	nodeI, ok := record.Get("n")
+	if ok {
+		node, ok := nodeI.(neo4j.Node)
+		if !ok {
+			return 0, nil, errors.New("CreateNode: can't convert to a neo4j Node")
+		}
+		return node.Id, result, nil
+	}
+	return 0, nil, errors.New("CreateNode: can't get record")
 }
 
-func createNodeCypher(mapping Mapping) (ret string) {
+func createNodeCypher(mapping mapping.Mapping) (ret string) {
 	var builder strings.Builder
 	builder.WriteString("CREATE (n:")
 	builder.WriteString(mapping.Label)
@@ -191,7 +193,7 @@ func createNodeCypher(mapping Mapping) (ret string) {
 
 // DeleteNode ...
 func (con *Connection) DeleteNode(node interface{}) error {
-	mapping, err := GetMapping(node)
+	mapping, err := mapping.GetMapping(node)
 	if err != nil {
 		return err
 	}
@@ -232,17 +234,16 @@ func (con *Connection) FindByProperty(property string, value string, candidate [
 
 // FindAllNodes finds all nodes of a given type
 func (con *Connection) FindAllNodes(nodeType interface{}) ([]interface{}, error) {
-	mapping, _ := GetMapping(nodeType)
+	mapping, _ := mapping.GetMapping(nodeType)
 
 	var builder strings.Builder
 	builder.WriteString("MATCH (n:")
 	builder.WriteString(mapping.Label)
 	builder.WriteString(") RETURN n")
-	return con.findNodeHelper(builder.String(), []interface{}{nodeType})
+	return con.findNodeHelper(builder.String(), nodeType)
 }
 
-func (con *Connection) findNodeHelper(cypher string, candidate []interface{}) ([]interface{}, error) {
-	// fmt.Println(cypher)
+func (con *Connection) findNodeHelper(cypher string, candidate interface{}) ([]interface{}, error) {
 	result, err := con.GetSession().Run(cypher,
 		map[string]interface{}{})
 	if err != nil {
@@ -281,7 +282,7 @@ const (
 // FindNodesClause finds all nodes of a given type
 // searchMode is applied for all string
 func (con *Connection) FindNodesClause(nodeType interface{}, where map[string]interface{}, mode SearchMode) ([]interface{}, error) {
-	mapping, err := GetMapping(nodeType)
+	mapping, err := mapping.GetMapping(nodeType)
 	if err != nil {
 		return nil, err
 	}
@@ -345,7 +346,7 @@ func (con *Connection) FindNodesClause(nodeType interface{}, where map[string]in
 	}
 	builder.WriteString(" RETURN n")
 
-	return con.findNodeHelper(builder.String(), []interface{}{nodeType})
+	return con.findNodeHelper(builder.String(), nodeType)
 }
 func interfaceConv(i interface{}) (string, error) {
 	conv, ok := i.(int)

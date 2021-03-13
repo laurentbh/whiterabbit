@@ -1,29 +1,44 @@
 package integration
 
 import (
-	"github.com/google/go-cmp/cmp"
 	"math/rand"
 	"strconv"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/laurentbh/whiterabbit"
 )
 
-func TestConstraint(t *testing.T) {
+func TestConstraintViolation(t *testing.T) {
+	LoadFixure([]string{"./fixtures/clean_all.txt", "./fixtures/constraint_violation.txt"})
+
+	neo, _ := whiterabbit.Open(Cfg{})
+	defer neo.Close()
+	con, _ := neo.GetConnection()
+	defer con.Close()
+
+	type Test struct {
+		Name string
+	}
+	_, _, err := con.CreateNode(Test{Name: "test1"})
+	assert.NotNil(t, err)
+
+	_, _, err = con.CreateNode(Test{Name: "unique"})
+	assert.Nil(t, err)
+}
+func TestConstraintCreation(t *testing.T) {
 	LoadFixure([]string{"./fixtures/clean_all.txt", "./fixtures/delete_constraint.txt"})
 	neo, _ := whiterabbit.Open(Cfg{})
 	defer neo.Close()
 	con, _ := neo.GetConnection()
 	defer con.Close()
 
-	err := con.SetUniqueConstraint(Category{}, "name", "cat_name_unique")
-	if err == nil {
-		t.Errorf("should return error")
-	}
+	err := con.SetUniqueConstraint(Category{}, "Name", "cat_name_unique")
+	assert.Nil(t, err, "should not return error")
+
 	err = con.SetUniqueConstraint(Category{}, "Name", "cat_name_unique")
-	if err != nil {
-		t.Errorf("should not return error, got [%s]", err)
-	}
+	assert.NotNil(t, err, "should return error")
 }
 func TestCreateNode(t *testing.T) {
 	LoadFixure([]string{"./fixtures/clean_all.txt"})
@@ -37,13 +52,12 @@ func TestCreateNode(t *testing.T) {
 	u.Model.Labels = make(map[string]string)
 	u.Model.ID = 123
 	u.Model.Labels = map[string]string{"label1": "value1", "label2": "value2"}
-	u.Nickname = make([]string,2)
+	u.Nickname = make([]string, 2)
 	u.Nickname[0] = "first"
 	u.Nickname[1] = "second"
 	_, _, err := con.CreateNode(u)
-	if err != nil {
-		t.Errorf("TestCreateNode: %v", err)
-	}
+
+	assert.Nil(t, err)
 }
 func TestDeleteNode(t *testing.T) {
 	LoadFixure([]string{"./fixtures/clean_all.txt"})
@@ -55,9 +69,8 @@ func TestDeleteNode(t *testing.T) {
 
 	u := User{Name: "user"}
 	_, _, err := con.CreateNode(u)
-	if err != nil {
-		t.Errorf("TestDeleteNode: %v", err)
-	}
+	assert.Nil(t, err)
+
 	u = User{Name: "user2"}
 	// whiterabbit.Model.Labels: map[string]string{"lol": "lol"}}
 	u.Labels = make(map[string]string)
@@ -65,27 +78,21 @@ func TestDeleteNode(t *testing.T) {
 	u.Labels["label2"] = "value2"
 
 	_, _, err = con.CreateNode(u)
-	if err != nil {
-		t.Errorf("TestDeleteNode: %v", err)
-	}
+	assert.Nil(t, err)
+
 	where := map[string]interface{}{"Name": "user2"}
 	ret, err := con.FindNodesClause(User{}, where, whiterabbit.StartsWith)
-	if err != nil {
-		t.Errorf("findNodes %v", err)
-	}
-	fecthed := ret[0].(User)
+	assert.Nil(t, err)
 
-	err = con.DeleteNode(fecthed)
-	if err != nil {
-		t.Errorf("TestDeleteNode: %v", err)
-	}
+	fetched := ret[0].(User)
+
+	err = con.DeleteNode(fetched)
+	assert.Nil(t, err)
+
 	ret, err = con.FindNodesClause(User{}, where, whiterabbit.StartsWith)
-	if err != nil {
-		t.Errorf("findNodes %v", err)
-	}
-	if ret != nil {
-		t.Errorf("TestDeleteNode: %v", err)
-	}
+
+	assert.Nil(t, err)
+	assert.Nil(t, ret)
 }
 func TestCreateFetchNode(t *testing.T) {
 	LoadFixure([]string{"./fixtures/clean_all.txt"})
@@ -97,33 +104,20 @@ func TestCreateFetchNode(t *testing.T) {
 
 	// create dummy user
 	userName := "user " + strconv.FormatInt(rand.Int63n(100), 10)
-	inUser := User{Name: userName, Age: 19, Nickname: []string{"one","two"}}
+	inUser := User{Name: userName, Age: 19, Nickname: []string{"one", "two"}}
 	_, _, err := con.CreateNode(inUser)
-	if err != nil {
-		panic(err)
-	}
+	assert.Nil(t, err)
 
 	ret, err := con.FindAllNodes(User{})
-	if err != nil {
-		t.Errorf("findNodes %v", err)
-	}
-	if len(ret) != 1 {
-		t.Errorf("findNodes returned too many entities")
-	}
-	retUser, ok := ret[0].(User)
+	assert.Nil(t, err)
 
-	if ok == false {
-		t.Error("findNodes return type is not a User")
-	}
-	if inUser.Name != retUser.Name {
-		t.Errorf("TestCreateFetchNode failed on user.Name")
-	}
-	if inUser.Age != retUser.Age {
-		t.Errorf("TestCreateFetchNode failed on user.Age")
-	}
-	if ! cmp.Equal(retUser.Nickname, inUser.Nickname) {
-		t.Errorf("TestCreateFetchNode failed on user.Nickanme [slice of string]")
-	}
+	assert.Equal(t, 1, len(ret), "findNodes should return 1 element")
+
+	assert.IsType(t, User{}, ret[0])
+
+	assert.Equal(t, inUser.Name, (ret[0].(User)).Name)
+	assert.Equal(t, inUser.Age, (ret[0].(User)).Age)
+	assert.Equal(t, inUser.Nickname, (ret[0].(User)).Nickname)
 }
 
 func TestFindNodesClause(t *testing.T) {
@@ -137,12 +131,9 @@ func TestFindNodesClause(t *testing.T) {
 
 	where := map[string]interface{}{"Name": "user"}
 	ret, err := con.FindNodesClause(User{}, where, whiterabbit.StartsWith)
-	if err != nil {
-		t.Errorf("findNodes %v", err)
-	}
-	if len(ret) != 3 {
-		t.Errorf("findNodes: %d elements returned, expecting %d", len(ret), 3)
-	}
+	assert.Nil(t, err)
+
+	assert.Equal(t, 3, len(ret))
 	for _, u := range ret {
 		_, ok := u.(User)
 		if ok == false {
@@ -167,14 +158,9 @@ func TestFindNodesMultipleClause(t *testing.T) {
 	if len(ret) != 1 {
 		t.Errorf("findNodes: %d elements returned, expecting %d", len(ret), 1)
 	}
-	u, ok := ret[0].(User)
-	if ok == false {
-		t.Error("findNodes return type is not a User")
-	} else {
-		if u.Age != 2 {
-			t.Error("findNodes return wrong user")
-		}
-	}
+	assert.IsType(t, User{}, ret[0])
+	assert.Equal(t, 2, (ret[0].(User)).Age)
+
 }
 func TestFindNodesIgnoreCase(t *testing.T) {
 	LoadFixure([]string{"./fixtures/clean_all.txt",

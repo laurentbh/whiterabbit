@@ -10,11 +10,16 @@ import (
 )
 
 // ConvertNode converts neo4j node into one of the candidate struct
-func ConvertNode(node neo4j.Node, candidates []interface{}) (interface{}, error) {
+func ConvertNode(node neo4j.Node, candidate interface{}, otherCandidates ...interface{}) (interface{}, error) {
 
+	var allCandidates []interface{}
+	allCandidates = append(allCandidates, candidate)
+	if len(otherCandidates) > 0 {
+		allCandidates = append(allCandidates, otherCandidates...)
+	}
 	var candidateType []string
 	// build list of type while making sure all candidates are struct
-	for _, c := range candidates {
+	for _, c := range allCandidates {
 		rValue := reflect.ValueOf(c)
 		if rValue.Kind() != reflect.Struct {
 			return "", fmt.Errorf("convertNode: %v is not a struct", c)
@@ -42,7 +47,7 @@ func ConvertNode(node neo4j.Node, candidates []interface{}) (interface{}, error)
 		return "", fmt.Errorf("node %s is not list of candidates", expectedType)
 	}
 
-	rValue := reflect.ValueOf(candidates[candIdx])
+	rValue := reflect.ValueOf(allCandidates[candIdx])
 	//make a copy
 	copyValuePtr := reflect.New(rValue.Type())
 	copyValue := copyValuePtr.Elem()
@@ -123,9 +128,9 @@ func setValueNeoToStruct(fv *reflect.Value, value interface{}) error {
 		switch reflect.TypeOf(first.Interface()).Kind() {
 		case reflect.String:
 			// alloc slice of strings
-			fv.Set( reflect.MakeSlice(reflect.TypeOf([]string{}), len, len))
+			fv.Set(reflect.MakeSlice(reflect.TypeOf([]string{}), len, len))
 			// copy elements
-			for i:=0; i<len; i++ {
+			for i := 0; i < len; i++ {
 				fv.Index(i).Set(reflect.ValueOf(v2.Index(i).Interface()))
 			}
 			return nil
