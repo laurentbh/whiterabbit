@@ -14,7 +14,7 @@ type Relation struct {
 }
 
 // RelationByNodeID return all relations for a given node id
-func (con *Connection) RelationByNodeID(id int64, candidates []interface{}) ([]Relation, error) {
+func (con *Connection) RelationByNodeID(id int64, candidate interface{}, otherCandidate ...interface{}) ([]Relation, error) {
 	cypher := "MATCH (n) –[r]-(d) WHERE id(n) = "
 	cypher = cypher + strconv.FormatInt(id, 10)
 	cypher = cypher + " RETURN n,r,d"
@@ -32,11 +32,11 @@ func (con *Connection) RelationByNodeID(id int64, candidates []interface{}) ([]R
 		var rel Relation
 		record := result.Record()
 
-		rel.From, err = ConvertNode(record.GetByIndex(0).(neo4j.Node), candidates)
+		rel.From, err = ConvertNode(record.GetByIndex(0).(neo4j.Node), candidate, otherCandidate...)
 		if err != nil {
 			return ret, err
 		}
-		rel.To, err = ConvertNode(record.GetByIndex(2).(neo4j.Node), candidates)
+		rel.To, err = ConvertNode(record.GetByIndex(2).(neo4j.Node), candidate, otherCandidate...)
 		if err != nil {
 			return ret, err
 		}

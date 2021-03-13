@@ -60,11 +60,11 @@ type User struct {
     Age      int
     password string
 }
-ret, _ := ConvertNode(node, []interface{}{User{}}))
+ret, _ := ConvertNode(node, User{}))
 u = ret.(User)
 ```
-- `ConvertNode` takes an array of `struct` as second parameter representing all potential internal target of the node.
 - if present `whiterabbit.Model` will be initialized, [see](#white-rabbit-model)
+- `ConvertNode` has a variadic third argument representing all struct candidate for the node
 
 ### white rabbit model
 adding `whiterabbit.Model` to struct allows:
@@ -78,8 +78,7 @@ type Model struct {
 ```
 ## relations
 ```go
-candidate := []interface{}{Ingredient{}, Category{}}
-relations, err := con.MatchRelation("is_a", candidate)
+relations, err := con.MatchRelation("is_a", Ingredient{}, Category{})
 ```
 ## transactions
 using `Connection.InTransaction(f)`

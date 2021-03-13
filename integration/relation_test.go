@@ -17,13 +17,27 @@ func TestRelationById(t *testing.T) {
 	con, _ := neo.GetConnection()
 	defer con.Close()
 
-	candidate := []interface{}{Ingredient{}, Category{}}
-
 	ret, _ := con.FindNodesClause(Ingredient{}, map[string]interface{}{"Name": "potato"}, whiterabbit.Exact)
 	potato, _ := ret[0].(Ingredient)
-	con.RelationByNodeID(potato.ID, candidate)
-	// TODO: find something to test where order is unpredictable
 
+	ret, _ = con.FindNodesClause(Ingredient{}, map[string]interface{}{"Name": "bean"}, whiterabbit.Exact)
+	bean, _ := ret[0].(Ingredient)
+
+	ret, _ = con.FindNodesClause(Category{}, map[string]interface{}{"Name": "vegetable"}, whiterabbit.Exact)
+	vegetable, _ := ret[0].(Category)
+
+	expected := []whiterabbit.Relation{
+		{Relation: "Defined_By",
+			From: potato,
+			To:   vegetable},
+		{Relation: "Like",
+			From: potato,
+			To:   bean},
+	}
+
+	r, err := con.RelationByNodeID(potato.ID, Ingredient{}, Category{})
+	assert.Nil(t, err)
+	assert.ElementsMatch(t, expected, r)
 }
 func TestRelation(t *testing.T) {
 	LoadFixure([]string{

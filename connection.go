@@ -135,21 +135,20 @@ func (con *Connection) CreateNode(value interface{}) (int64, neo4j.Result, error
 	if result.Err() != nil {
 		return 0, nil, result.Err()
 	}
-
-	if result.Next() {
-		record := result.Record()
-		nodeI, ok := record.Get("n")
-		if ok {
-			node, ok := nodeI.(neo4j.Node)
-			if !ok {
-				return 0, nil, errors.New("CreateNode: can't convert to a neo4j Node")
-			}
-			return node.Id, result, nil
-		}
-		return 0, nil, errors.New("CreateNode: can't get record")
-	} else {
-		return 0, nil, errors.New("CreateNode: can't get result")
+	record, err := result.Single()
+	if err != nil {
+		return 0, nil, err
 	}
+
+	nodeI, ok := record.Get("n")
+	if ok {
+		node, ok := nodeI.(neo4j.Node)
+		if !ok {
+			return 0, nil, errors.New("CreateNode: can't convert to a neo4j Node")
+		}
+		return node.Id, result, nil
+	}
+	return 0, nil, errors.New("CreateNode: can't get record")
 }
 
 func createNodeCypher(mapping mapping.Mapping) (ret string) {

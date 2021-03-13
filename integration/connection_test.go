@@ -21,12 +21,11 @@ func TestConstraintViolation(t *testing.T) {
 	type Test struct {
 		Name string
 	}
-	test1 := Test{Name: "test1"}
-	_, _, err := con.CreateNode(test1)
-	// _, _, err = con.CreateNode(test1)
-
+	_, _, err := con.CreateNode(Test{Name: "test1"})
 	assert.NotNil(t, err)
 
+	_, _, err = con.CreateNode(Test{Name: "unique"})
+	assert.Nil(t, err)
 }
 func TestConstraintCreation(t *testing.T) {
 	LoadFixure([]string{"./fixtures/clean_all.txt", "./fixtures/delete_constraint.txt"})
