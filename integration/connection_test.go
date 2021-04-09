@@ -141,6 +141,33 @@ func TestFindNodesClause(t *testing.T) {
 		}
 	}
 }
+func TestFindById(t *testing.T) {
+	LoadFixure([]string{"./fixtures/clean_all.txt", "./fixtures/findNodeById.txt"})
+
+	neo, _ := whiterabbit.Open(Cfg{})
+	defer neo.Close()
+	con, _ := neo.GetConnection()
+	defer con.Close()
+
+	type TestNode struct {
+		whiterabbit.Model
+		Name string
+	}
+
+	where := map[string]interface{}{"Name": "node for unit test"}
+	ret, err := con.FindNodesClause(TestNode{}, where, whiterabbit.Exact)
+	assert.Nil(t, err)
+	assert.Equal(t, 1, len(ret))
+	assert.IsType(t, TestNode{}, ret[0])
+
+	testNodeId := ret[0].(TestNode)
+
+	node, err := con.FindById(testNodeId.ID, TestNode{})
+
+	assert.Nil(t, err)
+	assert.IsType(t, TestNode{}, node)
+	assert.Equal(t, "node for unit test", (node.(TestNode)).Name)
+}
 func TestFindNodesMultipleClause(t *testing.T) {
 	LoadFixure([]string{"./fixtures/clean_all.txt",
 		"./fixtures/findNodesClause.txt"})

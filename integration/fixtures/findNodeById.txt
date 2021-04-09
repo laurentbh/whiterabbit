@@ -1,0 +1,2 @@
+CREATE (n:TestNode{Name: "node for unit test"});
+CREATE (n:TestNode{Name: "another node for unit test"});
