@@ -227,7 +227,10 @@ func (con *Connection) FindById(id int64, candidate interface{}) (interface{}, e
 	if err != nil {
 		return nil, err
 	}
-	return ret[0], nil
+	if len(ret) > 0 {
+		return ret[0], nil
+	}
+	return nil, nil
 }
 
 // FindByProperty find all node with given property containg value

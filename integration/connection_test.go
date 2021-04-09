@@ -141,6 +141,25 @@ func TestFindNodesClause(t *testing.T) {
 		}
 	}
 }
+func TestFindByUnknownId(t *testing.T) {
+	LoadFixure([]string{"./fixtures/clean_all.txt", "./fixtures/findNodeById.txt"})
+
+	neo, _ := whiterabbit.Open(Cfg{})
+	defer neo.Close()
+	con, _ := neo.GetConnection()
+	defer con.Close()
+
+	type TestNode struct {
+		whiterabbit.Model
+		Name string
+	}
+
+	node, err := con.FindById(100000000000, TestNode{})
+
+	assert.Nil(t, err)
+	assert.Nil(t, node)
+}
+
 func TestFindById(t *testing.T) {
 	LoadFixure([]string{"./fixtures/clean_all.txt", "./fixtures/findNodeById.txt"})
 
